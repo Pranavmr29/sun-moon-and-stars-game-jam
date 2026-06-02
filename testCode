@@ -1,0 +1,98 @@
+import pygame
+import sys
+import math
+
+#Initializing
+pygame.init()
+
+WIDTH, HEIGHT = 800, 700
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+clock = pygame.time.Clock()
+
+
+G = 0.2
+
+planets = [
+    {
+        "mass": 5000, "x": 300.0, "y": 500.0,
+        "vx": 0.0, "vy": 0.0, "radius": 10, "color": (0, 150, 255),
+        "trail": [], "surface": pygame.transform.scale(pygame.image.load("images/planet 1.png").convert_alpha(), (72, 72))
+    },
+    {
+        "mass": 5000, "x": 300.0, "y": 200.0,
+        "vx": 0.0, "vy": 0.0, "radius": 12, "color": (0, 255, 150),
+        "trail": [], "surface": pygame.transform.scale(pygame.image.load("images/planet 2.png").convert_alpha(), (72, 72))
+    },
+    {
+        "mass": 5000, "x": 500.0, "y": 350.0,
+        "vx": 0.0, "vy": 0.0, "radius": 12, "color": (0, 255, 150),
+        "trail": [], "surface": pygame.transform.scale(pygame.image.load("images/planet 3.png").convert_alpha(), (72, 72))
+    }
+]
+
+
+ship = {
+    "mass": 100,
+    "x": 300.0, "y": 25.0,
+    "vx": 2.25, "vy": 0,
+    "radius": 10,
+    "color": (0, 150, 255),
+    "trail": []
+}
+
+shipSurface = pygame.transform.scale(pygame.image.load("images/spaceship with flames 1.png").convert_alpha(), (36, 48))
+
+#Main Simulation Loop
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+    #create variables for total forces acting on ship
+    totalFx = 0
+    totalFy = 0
+    #Calculate distances
+    for p in planets:
+        dx = p["x"] - ship["x"]
+        dy = p["y"] - ship["y"]
+        distance = math.sqrt(dx**2 + dy**2)
+        #Change distances if multiple bodies happen to overlap perfectly and a divide by 0 error occurs
+        if distance < 50: distance = 100
+
+        force = G * (p["mass"] * ship["mass"]) / (distance**2)
+        totalFx += force * (dx / distance)
+        totalFy += force * (dy / distance)
+    
+    #apply sum of all forces
+    #F = ma -> a = F/m
+    ship["vx"] += totalFx / ship["mass"]
+    ship["vy"] += totalFy / ship["mass"]
+
+    ship["x"] += ship["vx"]
+    ship["y"] += ship["vy"]
+
+    for p in planets:
+        p["x"] += p["vx"]
+        p["y"] += p["vy"]
+
+    #RENDERING
+    screen.fill((10, 10, 15))
+
+    #Record planet's position for orbital trail
+    ship["trail"].append((int(ship["x"]), int(ship["y"])))
+    if len(ship["trail"]) > 100:
+        ship["trail"].pop(0)
+        
+    #Draw orbit line trail
+    if len(ship["trail"]) > 1:
+        pygame.draw.lines(screen, (50, 50, 80), False, ship["trail"], 1)
+
+    for p in planets:
+        screen.blit(p["surface"], (int(p["x"]), int(p["y"])))
+
+    screen.blit(shipSurface, (int(ship["x"]), int(ship["y"])))
+    pygame.display.flip()
+    clock.tick(60)
+
+pygame.quit()
+sys.exit()
