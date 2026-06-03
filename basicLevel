@@ -124,6 +124,11 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_r:
+                ship["state"] = "LAUNCH"
+                ship["x"], ship["y"] = 100, 364
+                ship["trail"] = []
         elif (event.type == pygame.MOUSEBUTTONDOWN and ship["state"] == "LAUNCH"):
             mouseX, mouseY = event.pos
             clickDist = math.sqrt((mouseX - ship["x"])**2 + (mouseY - ship["y"])**2)
@@ -140,6 +145,7 @@ while running:
             ship["vx"] = dx * LaunchMultiplier
             ship["vy"] = dy * LaunchMultiplier
             ship["state"] = "FREE"
+
     #create variables for total forces acting on ship
     totalFx = 0
     totalFy = 0
