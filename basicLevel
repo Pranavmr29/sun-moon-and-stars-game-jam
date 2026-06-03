@@ -158,18 +158,7 @@ while running:
     totalFy = 0
     #Calculate distances
     calculateForces(ship, planets)
-    """
-    for p in planets:
-        dx = p["x"] - ship["x"]
-        dy = p["y"] - ship["y"]
-        distance = math.sqrt(dx**2 + dy**2)
-        #Change distances if multiple bodies happen to overlap perfectly and a divide by 0 error occurs
-        if distance < 50: distance = 75
-
-        force = G * (p["mass"] * ship["mass"]) / (distance**2)
-        totalFx += force * (dx / distance)
-        totalFy += force * (dy / distance)
-    """
+    
     #apply sum of all forces
     #F = ma -> a = F/m
     if ship["state"] == "FREE":
@@ -183,18 +172,7 @@ while running:
     for p in planets:
         p["x"] += p["vx"]
         p["y"] += p["vy"]
-    """
-    dx = planets[0]["x"] - planets[1]["x"]
-    dy = planets[0]["y"] - planets[1]["y"]
-    distance = math.sqrt(dx**2 + dy**2)
-    force = G * (planets[0]["mass"] * planets[1]["mass"]) / (distance**2)
-    totalFx += force * (dx / distance)
-    totalFy += force * (dy / distance)
-    planets[1]["vx"] += totalFx / planets[1]["mass"]
-    planets[1]["vy"] += totalFy / planets[1]["mass"]
 
-    
-    """
     #RENDERING
     screen.fill((10, 10, 15))
 

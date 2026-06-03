@@ -8,8 +8,8 @@ uniform sampler2D Texture;
 uniform vec2 resolution;
 
 // ─── Tuneable parameters ───────────────────────────────────────────────────
-const float WARP_X        = 0.00;   // horizontal barrel distortion; was 0.065
-const float WARP_Y        = 0.00;    // vertical barrel distortion; was 0.05
+const float WARP_X        = 0.0;   // horizontal barrel distortion; was 0.065
+const float WARP_Y        = 0.0;    // vertical barrel distortion; was 0.05
 
 const float SCANLINE_DARK = 0.6;     // 0=no scanlines, 1=fully black gaps
 const float SCANLINE_SOFT = 1.5;     // higher = softer scanline edges
