@@ -89,7 +89,7 @@ planets = [
     },
 
     {
-        "mass": 3000, "x": 364, "y": 100,
+        "mass": 3000, "x": 364, "y": 150,
         "vx": 3.75, "vy": 0.0, "radius": 5, "color": (0, 255, 150),
         "trail": [], "surface": pygame.transform.scale(pygame.image.load("images/redscale moon.png").convert_alpha(), (42, 42))
     }
@@ -272,12 +272,12 @@ while running:
         p["y"] += p["vy"]
 
     # ── Draw game at low resolution ──────────────────────────────────────────
-    game_surface.fill((15, 15, 35))
+    game_surface.fill((35, 35, 55))
 
     #Fake starfield
     for star in backgroundStarPositions:
         starType, position = star
-        starSurface = pygame.transform.scale(pygame.image.load("images/background star " + str(starType) + ".png").convert_alpha(), (9, 9))
+        starSurface = pygame.transform.scale(pygame.image.load("images/redscale background star " + str(starType) + ".png").convert_alpha(), (9, 9))
         game_surface.blit(starSurface, position)
 
     x += speed

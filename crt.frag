@@ -8,11 +8,11 @@ uniform sampler2D Texture;
 uniform vec2 resolution;
 
 // ─── Tuneable parameters ───────────────────────────────────────────────────
-const float WARP_X        = 0.0;   // horizontal barrel distortion; was 0.065
-const float WARP_Y        = 0.0;    // vertical barrel distortion; was 0.05
+const float WARP_X        = 0.26;   // horizontal barrel distortion; was 0.065
+const float WARP_Y        = 0.2;    // vertical barrel distortion; was 0.05
 
-const float SCANLINE_DARK = 0.6;     // 0=no scanlines, 1=fully black gaps
-const float SCANLINE_SOFT = 1.5;     // higher = softer scanline edges
+const float SCANLINE_DARK = 0.5;     // 0=no scanlines, 1=fully black gaps; was 0.6, then 0.95
+const float SCANLINE_SOFT = 0.5;     // higher = softer scanline edges; was 1.5, then 0.3
 
 const float MASK_STRENGTH = 0.25;    // phosphor RGB mask intensity
 const float MASK_DOT_W    = 3.0;     // mask stripe width in pixels
@@ -69,12 +69,8 @@ vec3 bloom(vec2 uv) {
 
 // Scanline darkening — smooth sine-based dip between lines
 float scanline(vec2 warpedUV) {
-    // pixCoord equivalent for warped position
-    float line = warpedUV.y * resolution.y;
-    float phase = fract(line);   // 0..1 within each scanline
-    // sine dip: darkest at phase=0 (line boundary), bright at 0.5 (centre)
-    float s = sin(phase * 3.14159);
-    s = pow(s, SCANLINE_SOFT);
+    float s = sin(gl_FragCoord.y * 3.14159 + warpedUV.y * 300.0);
+    s = pow(abs(s), SCANLINE_SOFT);
     return mix(1.0 - SCANLINE_DARK, 1.0, s);
 }
 
