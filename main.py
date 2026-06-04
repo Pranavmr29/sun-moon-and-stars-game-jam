@@ -6,7 +6,7 @@ planet collision?
 level progression
 
 """
-# Claude's CRT shader starts
+#Import libraries
 import pygame
 import sys
 import random
@@ -14,34 +14,36 @@ import math
 import moderngl
 import numpy as np
 
-# ── Config ──────────────────────────────────────────────────────────────────
+#This section code was created using Claude for the CRT visual effects. Sections created using Claude are within the hyphen lines
+#──────────────────────────────────────────────────────────────────
+#Sets the window and game resolution, initializes Pygame and creates an OpenGL window mode
 WINDOW_SIZE = (800, 600)
 GAME_RES = (800, 600)
-
-# ── Init ────────────────────────────────────────────────────────────────────
 pygame.init()
-pygame.display.set_mode(WINDOW_SIZE, pygame.OPENGL | pygame.DOUBLEBUF)
+pygame.display.set_mode(WINDOW_SIZE, pygame.OPENGL | pygame.DOUBLEBUF) #Uses DOUBLEBUF to prevent tearing by drawing one frame while displaying another
 
+#Creates ModernGL context (interface to GPU)
 ctx = moderngl.create_context()
 
-# ── Game surface (low res, drawn normally with pygame) ──────────────────────
+#Creates a pygame surface that's drawn on normally before being sent to GPU
 game_surface = pygame.Surface(GAME_RES)
 
-# ── Texture ─────────────────────────────────────────────────────────────────
+#Creates a GPU texture to hold the game surface. 4 means RGBA and linear causes smooth sampling rather than pixelating
 texture = ctx.texture(GAME_RES, 4)
-texture.filter = (moderngl.LINEAR, moderngl.LINEAR)  # LINEAR for smooth CRT blur
+texture.filter = (moderngl.LINEAR, moderngl.LINEAR)
 
-# ── Shaders ─────────────────────────────────────────────────────────────────
+#Reads the shader files
 with open("quad.vert") as f:
     vert_src = f.read()
 with open("crt.frag") as f:
     frag_src = f.read()
 
+#Compiles the shaders to a GPU program and sets the two uniforms
 program = ctx.program(vertex_shader=vert_src, fragment_shader=frag_src)
 program["Texture"]    = 0
-program["resolution"] = WINDOW_SIZE   # shader works in output pixel space
+program["resolution"] = WINDOW_SIZE
 
-# ── Fullscreen quad ──────────────────────────────────────────────────────────
+#Defines 2 triangles that cover the screen together; each vertex has position and UV coordinates
 vertices = np.array([
     # pos (x,y)   uv (u,v)
     -1.0, -1.0,   0.0, 0.0,
@@ -53,15 +55,17 @@ vertices = np.array([
      1.0,  1.0,   1.0, 1.0,
 ], dtype="f4")
 
+#Uploads vertex data to GPU and tells the GPU how to read the VBO - 2 floats for position and UV each
 vbo = ctx.buffer(vertices.tobytes())
 vao = ctx.vertex_array(program, [(vbo, "2f 2f", "in_pos", "in_uv")])
 
-# ── Game state ───────────────────────────────────────────────────────────────
+#Control framerate with clock and set other game state variables
 clock = pygame.time.Clock()
 x     = 30.0
 speed = 1.5
-font  = pygame.font.SysFont(None, 16)
-# Claude's CRT shader ends
+#──────────────────────────────────────────────────────────────────
+
+
 #----------------------------------- GAME VARIABLES -----------------------------------#
 G = 0.2
 
@@ -73,6 +77,7 @@ predictSteps = 50
 
 shipWidth = 42
 shipHeight = 42
+titleIsShown = True
 
 #map of star locations
 backgroundStarPositions = [
@@ -224,7 +229,7 @@ def resetField():
     ship["state"] = "LAUNCH"
     ship["x"], ship["y"] = 100, 364
     ship["trail"] = []
-# ── Loop ─────────────────────────────────────────────────────────────────────
+
 running = True
 while running:
     for event in pygame.event.get():
@@ -234,6 +239,7 @@ while running:
             if event.key == pygame.K_r:
                 resetField()
         elif (event.type == pygame.MOUSEBUTTONDOWN and ship["state"] == "LAUNCH"):
+            titleIsShown = False
             mouseX, mouseY = event.pos
             clickDist = math.sqrt((mouseX - ship["x"])**2 + (mouseY - ship["y"])**2)
             if clickDist < 40:
@@ -241,8 +247,10 @@ while running:
                 mouseStartPos = event.pos
                 mouseCurrentPos = event.pos
         elif event.type == pygame.MOUSEMOTION and isDragging:
+            titleIsShown = False
             mouseCurrentPos = event.pos
         elif event.type == pygame.MOUSEBUTTONUP and isDragging:
+            titleIsShown = False
             isDragging = False
             dx = mouseStartPos[0] - mouseCurrentPos[0]
             dy = mouseStartPos[1] - mouseCurrentPos[1]
@@ -271,7 +279,7 @@ while running:
         p["x"] += p["vx"]
         p["y"] += p["vy"]
 
-    # ── Draw game at low resolution ──────────────────────────────────────────
+    #Fill game surface to cover previous frame
     game_surface.fill((35, 35, 55))
 
     #Fake starfield
@@ -320,16 +328,31 @@ while running:
     if all(t["state"] == "HIT" for t in targets):
         resetField()
 
+    #Draw title
+    if titleIsShown:
+        titleFont = pygame.font.Font("fonts/VCR_OSD_MONO_1.001.ttf", 128)
+        titleText = titleFont.render("RED-EYE", True, (255, 1, 1))
+        titleRect = titleText.get_rect(center = (400, 100))
+        game_surface.blit(titleText, titleRect)
+        subtitleFont = pygame.font.Font("fonts/VCR_OSD_MONO_1.001.ttf", 32)
+        subtitleText = subtitleFont.render("PULL BACK SHIP TO START", True, (255, 1, 1))
+        subtitleRect = subtitleText.get_rect(center = (400, 175))
+        game_surface.blit(subtitleText, subtitleRect)
+
     drawLaunchLine(game_surface)
 
-    # ── Upload to GPU ────────────────────────────────────────────────────────
+    #────────────────────────────────────────────────────────────────── Claude coded for CRT visuals
+    #Converts game_surface to bytes and uploads it to GPU texture each frame. Binds texture to slot 0 to match earlier code
     texture.write(pygame.image.tobytes(game_surface, "RGBA", False))
     texture.use(0)
 
+    #Clears the screen to black and runs shaders
     ctx.clear(0.0, 0.0, 0.0)
     vao.render()
 
+    #Swaps buffers to show new frame and caps framerate at 60 fps
     pygame.display.flip()
     clock.tick(60)
+    #──────────────────────────────────────────────────────────────────
 
 pygame.quit()
