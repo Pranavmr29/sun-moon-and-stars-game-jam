@@ -1,3 +1,11 @@
+"""
+TODO:
+functionize all planets/targets
+center planet sprites
+planet collision?
+level progression
+
+"""
 # Claude's CRT shader starts
 import pygame
 import sys
@@ -8,11 +16,11 @@ import numpy as np
 
 # ── Config ──────────────────────────────────────────────────────────────────
 WINDOW_SIZE = (800, 600)
-GAME_RES    = (800, 600)   # low-res game surface — CRT effect looks best here
+GAME_RES = (800, 600)
 
 # ── Init ────────────────────────────────────────────────────────────────────
 pygame.init()
-screen = pygame.display.set_mode(WINDOW_SIZE, pygame.OPENGL | pygame.DOUBLEBUF)
+pygame.display.set_mode(WINDOW_SIZE, pygame.OPENGL | pygame.DOUBLEBUF)
 
 ctx = moderngl.create_context()
 
@@ -74,14 +82,14 @@ backgroundStarPositions = [
 
 planets = [
     {
-        "mass": 10000, "x": 364, "y": 364,
+        "mass": 10000, "x": 364, "y": 300,
         "vx": 0.0, "vy": 0.0, "radius": 10, "color": (0, 150, 255),
         "trail": [],
         "surface": pygame.transform.scale(pygame.image.load("images/redscale planet 1.png").convert_alpha(), (84, 84))
     },
 
     {
-        "mass": 3000, "x": 364, "y": 200,
+        "mass": 3000, "x": 364, "y": 100,
         "vx": 3.75, "vy": 0.0, "radius": 5, "color": (0, 255, 150),
         "trail": [], "surface": pygame.transform.scale(pygame.image.load("images/redscale moon.png").convert_alpha(), (42, 42))
     }
@@ -102,12 +110,33 @@ ship = {
     "color": (0, 150, 255),
     "trail": [],
     "state": "LAUNCH",
-    "surface": shipImage
+    "surface": shipImage,
+    "mask": pygame.mask.from_surface(shipImage)
 }
 
-target = pygame.transform.scale(pygame.image.load("images/redscale target x.png").convert_alpha(), (shipWidth, shipHeight))
+targetSurface = pygame.transform.scale(pygame.image.load("images/redscale target x.png").convert_alpha(), (shipWidth, shipHeight))
+targets = [
+    {
+        "x": 650,
+        "y": 300,
+        "state": "UNHIT",
+        "surface": targetSurface,
+        "mask": pygame.mask.from_surface(targetSurface)
+     },
+     {
+        "x": 300,
+        "y": 100,
+        "state": "UNHIT",
+        "surface": targetSurface,
+        "mask": pygame.mask.from_surface(targetSurface)
+     }
+    ]
 
 #----------------------------------- GAME FUNCTIONS -----------------------------------#
+def checkCollision(target):
+    offset = (int(ship["x"] - target["x"]), int(ship["y"] - target["y"]))
+    return target["mask"].overlap(ship["mask"], offset) is not None
+
 def calculateForces(body, factors):
     totalFx = 0
     totalFy = 0
@@ -171,6 +200,30 @@ def drawLaunchLine(surface):
             #Draws a sequence of small connected lines showing the future gravity curve
             pygame.draw.lines(surface, (255, 1, 1), False, predictionPoints, 2)
 
+def checkPlanetCollision():
+    for p in planets:
+        planet_cx = p["x"] + p["surface"].get_width() / 2
+        planet_cy = p["y"] + p["surface"].get_height() / 2
+        ship_cx = ship["x"] + shipWidth / 2
+        ship_cy = ship["y"] + shipHeight / 2
+        
+        distance = math.sqrt((ship_cx - planet_cx)**2 + (ship_cy - planet_cy)**2)
+        #use image size as radius
+        collision_radius = p["surface"].get_width() / 2
+        
+        if distance < collision_radius:
+            ship["vx"] = 0
+            ship["vy"] = 0
+            resetField()
+
+def resetField():
+    for t in targets:
+        t["state"] = "UNHIT"
+        t["x"] = random.randint(50, 750)
+        t["y"] = random.randint(50, 500)
+    ship["state"] = "LAUNCH"
+    ship["x"], ship["y"] = 100, 364
+    ship["trail"] = []
 # ── Loop ─────────────────────────────────────────────────────────────────────
 running = True
 while running:
@@ -179,9 +232,7 @@ while running:
             running = False
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_r:
-                ship["state"] = "LAUNCH"
-                ship["x"], ship["y"] = 100, 364
-                ship["trail"] = []
+                resetField()
         elif (event.type == pygame.MOUSEBUTTONDOWN and ship["state"] == "LAUNCH"):
             mouseX, mouseY = event.pos
             clickDist = math.sqrt((mouseX - ship["x"])**2 + (mouseY - ship["y"])**2)
@@ -210,6 +261,7 @@ while running:
     if ship["state"] == "FREE":
         ship["vx"] += totalFx / ship["mass"]
         ship["vy"] += totalFy / ship["mass"]
+        #checkPlanetCollision()
 
         ship["x"] += ship["vx"]
         ship["y"] += ship["vy"]
@@ -225,7 +277,7 @@ while running:
     #Fake starfield
     for star in backgroundStarPositions:
         starType, position = star
-        starSurface = pygame.transform.scale(pygame.image.load("images/redscale background star " + str(starType) + ".png").convert_alpha(), (9, 9))
+        starSurface = pygame.transform.scale(pygame.image.load("images/background star " + str(starType) + ".png").convert_alpha(), (9, 9))
         game_surface.blit(starSurface, position)
 
     x += speed
@@ -259,17 +311,16 @@ while running:
     for p in planets:
         game_surface.blit(p["surface"], (int(p["x"]), int(p["y"])))
 
-    game_surface.blit(target, (550, 550))
-    drawLaunchLine(game_surface)
-    # Bouncing ball
-    #pygame.draw.circle(game_surface, (255, 230, 80), (int(x), GAME_RES[1]//2), 14)
-    #pygame.draw.circle(game_surface, (255, 255, 180), (int(x)-4, GAME_RES[1]//2-4), 5)
+    for t in targets:
+        if t["state"] == "UNHIT":
+            game_surface.blit(t["surface"], (t["x"], t["y"]))
+            if checkCollision(t):
+                t["state"] = "HIT"
 
-    # Some colourful rectangles so the mask is visible
-    #pygame.draw.rect(game_surface, (200, 50, 50),  (10, 10, 40, 20))
-    #pygame.draw.rect(game_surface, (50, 200, 50),  (60, 10, 40, 20))
-    #pygame.draw.rect(game_surface, (50, 50, 200),  (110, 10, 40, 20))
-    #pygame.draw.rect(game_surface, (200, 200, 200),(160, 10, 40, 20))
+    if all(t["state"] == "HIT" for t in targets):
+        resetField()
+
+    drawLaunchLine(game_surface)
 
     # ── Upload to GPU ────────────────────────────────────────────────────────
     texture.write(pygame.image.tobytes(game_surface, "RGBA", False))
