@@ -84,6 +84,9 @@ MIN_DIST = 75
 
 #----------------------------------- OTHER VARIABLES -----------------------------------#
 showTitle = True
+showTutorial = False
+titleFont = pygame.font.Font("fonts/VCR_OSD_MONO_1.001.ttf", 192)
+smallerFont = pygame.font.Font("fonts/VCR_OSD_MONO_1.001.ttf", 32)
 #----------------------------------- CLASSES -----------------------------------#
 #base class for all physics based objects
 class Body:
@@ -244,7 +247,7 @@ target_surface = pygame.transform.scale(pygame.image.load("images/redscale targe
 background_stars = [(random.randint(1, 3), (random.randint(1, 1150), random.randint(1, 600))) for _ in range(100)]
 #preload stars
 star_images = {i: pygame.transform.scale(pygame.image.load(f"images/redscale background star {i}.png").convert_alpha(),(9, 9)) for i in range(1, 4)}
-
+button = pygame.transform.scale(pygame.image.load("images/redscale button 1.png").convert_alpha(), (252, 63))
 #----------------------------------- SCENE -----------------------------------#
 planets: list[Planet] = [
     Planet(
@@ -354,14 +357,32 @@ while running:
     
     #Draw title
     if showTitle:
-        titleFont = pygame.font.Font("fonts/VCR_OSD_MONO_1.001.ttf", 192)
         titleText = titleFont.render("RED-EYE", True, (255, 1, 1))
         titleRect = titleText.get_rect(center = (575, 100))
         game_surface.blit(titleText, titleRect)
-        subtitleFont = pygame.font.Font("fonts/VCR_OSD_MONO_1.001.ttf", 32)
-        subtitleText = subtitleFont.render("BY PRANAV RAMANATHAN AND ROHAN RANJESH", True, (255, 1, 1))
+        subtitleText = smallerFont.render("BY PRANAV RAMANATHAN AND ROHAN RANJESH", True, (255, 1, 1))
         subtitleRect = subtitleText.get_rect(center = (575, 615))
         game_surface.blit(subtitleText, subtitleRect)
+
+        game_surface.blit(button, (280, 520)) 
+        game_surface.blit(button, (618, 520))
+        button1Text = smallerFont.render("PLAY", True, (255, 1, 1))
+        button1Rect = button1Text.get_rect(center = (406, 551))
+        game_surface.blit(button1Text, button1Rect)
+        button2Text = smallerFont.render("TUTORIAL", True, (255, 1, 1))
+        button2Rect = button2Text.get_rect(center = (744, 551))
+        game_surface.blit(button2Text, button2Rect)
+
+    if showTutorial:
+        tutorialText = smallerFont.render("CLICK AND DRAG THE MISSILE TO PULL IT BACK AND LAUNCH IT", True, (255, 1, 1))
+        tutorialRect = tutorialText.get_rect(center = (575, 50))
+        game_surface.blit(tutorialText, tutorialRect)
+        tutorialText2 = smallerFont.render("ONCE YOU'VE LAUNCHED, THERE IS NO CONTROL", True, (255, 1, 1))
+        tutorialRect2 = tutorialText2.get_rect(center = (575, 80))
+        game_surface.blit(tutorialText2, tutorialRect2)
+        tutorialText3 = smallerFont.render("AIM FOR THE TARGETS, LIEUTENANT", True, (255, 1, 1))
+        tutorialRect3 = tutorialText3.get_rect(center = (575, 110))
+        game_surface.blit(tutorialText3, tutorialRect3)
 
     if is_dragging:
         draw_launch_line(game_surface, missile, planets,mouse_start_pos, mouse_current_pos)
