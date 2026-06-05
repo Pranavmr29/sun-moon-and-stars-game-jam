@@ -17,8 +17,8 @@ import numpy as np
 #This section code was created using Claude for the CRT visual effects. Sections created using Claude are within the hyphen lines
 #------------------------------------------------------------------------------------------
 #Sets the window and game resolution, initializes Pygame and creates an OpenGL window mode
-WINDOW_SIZE = (1250, 700)
-GAME_RES = (1250, 700)
+WINDOW_SIZE = (1150, 660)
+GAME_RES = (1150, 660)
 
 # ── Init ────────────────────────────────────────────────────────────────────
 pygame.init()
@@ -83,7 +83,7 @@ MISSILE_H = 36
 MIN_DIST = 75
 
 #----------------------------------- OTHER VARIABLES -----------------------------------#
-titleIsShown = True
+showTitle = True
 #----------------------------------- CLASSES -----------------------------------#
 #base class for all physics based objects
 class Body:
@@ -241,7 +241,7 @@ def draw_launch_line(surface, missile: Missile, planets: list[Planet],
 missile_image = pygame.transform.scale(pygame.image.load("images/redscale spaceship with flames 1.png").convert_alpha(), (MISSILE_W, MISSILE_H))
 target_surface = pygame.transform.scale(pygame.image.load("images/redscale target x.png").convert_alpha(), (MISSILE_W, MISSILE_H))
 
-background_stars = [(random.randint(1, 3), (random.randint(1, 800), random.randint(1, 700))) for _ in range(50)]
+background_stars = [(random.randint(1, 3), (random.randint(1, 1150), random.randint(1, 600))) for _ in range(100)]
 #preload stars
 star_images = {i: pygame.transform.scale(pygame.image.load(f"images/redscale background star {i}.png").convert_alpha(),(9, 9)) for i in range(1, 4)}
 
@@ -295,7 +295,7 @@ while running:
             if event.key == pygame.K_DOWN:  missile.vy += 10
             
         elif event.type == pygame.MOUSEBUTTONDOWN and missile.state == Missile.LAUNCH:
-            titleIsShown = False
+            showTitle = False
             mx, my = event.pos
             dist = math.hypot(mx - missile.x, my - missile.y)
             if dist < 40:
@@ -304,11 +304,11 @@ while running:
                 mouse_current_pos = event.pos
  
         elif event.type == pygame.MOUSEMOTION and is_dragging:
-            titleIsShown = False
+            showTitle = False
             mouse_current_pos = event.pos
  
         elif event.type == pygame.MOUSEBUTTONUP and is_dragging:
-            titleIsShown = False
+            showTitle = False
             is_dragging = False
             missile.launch(mouse_start_pos, mouse_current_pos)
 
@@ -353,14 +353,14 @@ while running:
         reset_field()
     
     #Draw title
-    if titleIsShown:
-        titleFont = pygame.font.Font("fonts/VCR_OSD_MONO_1.001.ttf", 128)
+    if showTitle:
+        titleFont = pygame.font.Font("fonts/VCR_OSD_MONO_1.001.ttf", 192)
         titleText = titleFont.render("RED-EYE", True, (255, 1, 1))
-        titleRect = titleText.get_rect(center = (400, 100))
+        titleRect = titleText.get_rect(center = (575, 100))
         game_surface.blit(titleText, titleRect)
         subtitleFont = pygame.font.Font("fonts/VCR_OSD_MONO_1.001.ttf", 32)
-        subtitleText = subtitleFont.render("PULL BACK SHIP TO START", True, (255, 1, 1))
-        subtitleRect = subtitleText.get_rect(center = (400, 175))
+        subtitleText = subtitleFont.render("BY PRANAV RAMANATHAN AND ROHAN RANJESH", True, (255, 1, 1))
+        subtitleRect = subtitleText.get_rect(center = (575, 615))
         game_surface.blit(subtitleText, subtitleRect)
 
     if is_dragging:
