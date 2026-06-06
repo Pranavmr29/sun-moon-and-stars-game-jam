@@ -1,10 +1,11 @@
 """
 TODO:
-center planet sprites
+Add multiple missiles
+Add planets/missile into tutorial
+Add buttons to leave tutorial and go back to home
 level progression
 comments
-powerups
-
+powerups (black/white hole and thrusters)
 """
 #Import libraries
 import pygame
@@ -18,8 +19,8 @@ from enum import Enum
 #This section code was created using Claude for the CRT visual effects. Sections created using Claude are within the hyphen lines
 #------------------------------------------------------------------------------------------
 #Sets the window and game resolution, initializes Pygame and creates an OpenGL window mode
-WINDOW_SIZE = (1150, 660)
-GAME_RES = (1150, 660)
+WINDOW_SIZE = (1150, 640)
+GAME_RES = (1150, 640)
 
 # ── Init ────────────────────────────────────────────────────────────────────
 pygame.init()
@@ -90,7 +91,7 @@ class GameStates(Enum):
     TRANSITION_TO_GAME = "T_GAME"
     GAME = "GAME"
 #----------------------------------- OTHER VARIABLES -----------------------------------#
-showTitle = True
+showText = True
 currState = GameStates.TRANSITION_TO_HOME
 #----------------------------------- CLASSES -----------------------------------#
 #base class for all physics based objects
@@ -176,7 +177,8 @@ class Missile(Body):
     
     def reset(self, x, y):
         self.x, self.y = float(x), float(y)
-        self.vx = self.vy = 0.0
+        self.vx = 0.0
+        self.vy = 0.0
         self.trail.clear()
         self.state = Missile.LAUNCH
     
@@ -271,11 +273,11 @@ subtitleFont = pygame.font.Font("fonts/VCR_OSD_MONO_1.001.ttf", 32)
 subtitleText = subtitleFont.render("BY PRANAV RAMANATHAN AND ROHAN RANJESH", True, (255, 1, 1))
 subtitleRect = subtitleText.get_rect(center = (575, 615))
 
-button1Text = smallerFont.render("PLAY", True, (255, 1, 1))
-button1Rect = button1Text.get_rect(center = (406, 551))
+playButtonText = smallerFont.render("PLAY", True, (255, 1, 1))
+playButtonRect = playButtonText.get_rect(center = (406, 551))
 
-button2Text = smallerFont.render("TUTORIAL", True, (255, 1, 1))
-button2Rect = button2Text.get_rect(center = (744, 551))
+tutorialButtonText = smallerFont.render("TUTORIAL", True, (255, 1, 1))
+tutorialButtonRect = tutorialButtonText.get_rect(center = (744, 551))
 
 tutorialText = smallerFont.render("CLICK AND DRAG THE MISSILE TO PULL IT BACK AND LAUNCH IT", True, (255, 1, 1))
 tutorialRect = tutorialText.get_rect(center = (575, 50))
@@ -283,15 +285,12 @@ tutorialRect = tutorialText.get_rect(center = (575, 50))
 tutorialText2 = smallerFont.render("ONCE YOU'VE LAUNCHED, THERE IS NO CONTROL", True, (255, 1, 1))
 tutorialRect2 = tutorialText2.get_rect(center = (575, 80))
 
-tutorialText3 = smallerFont.render("AIM FOR THE TARGETS, LIEUTENANT", True, (255, 1, 1))
+tutorialText3 = smallerFont.render("WATCH OUT FOR GRAVITATIONAL FIELDS", True, (255, 1, 1))
 tutorialRect3 = tutorialText3.get_rect(center = (575, 110))
 
-"""
+tutorialText4 = smallerFont.render("AIM FOR THE TARGETS, LIEUTENANT", True, (255, 1, 1))
+tutorialRect4 = tutorialText4.get_rect(center = (575, 140))
 
-game_surface.blit(tutorialText, tutorialRect)
-game_surface.blit(tutorialText2, tutorialRect2)
-game_surface.blit(tutorialText3, tutorialRect3)
-"""
 #----------------------------------- SCENE -----------------------------------#
 bodies: list[Body] = [
     #Planet(
@@ -312,9 +311,7 @@ bodies: list[Body] = [
  
 missile = Missile(x = 557, y = 50, image = missile_image)
  
-targets: list[Target] = [
-    Target(x = 650, y = 300, surface = target_surface),
-]
+targets: list[Target] = []
  
  
 def reset_field():
@@ -360,6 +357,21 @@ while running:
                 is_dragging = False
                 missile.launch(mouse_start_pos, mouse_current_pos)
 
+        elif currState == GameStates.TUTORIAL:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r: reset_field()
+            if event.type == pygame.MOUSEBUTTONDOWN and missile.state == Missile.LAUNCH:
+                mx, my = event.pos
+                if math.hypot(mx - missile.x, my - missile.y) < 40:
+                    is_dragging = True
+                    mouse_start_pos = mouse_current_pos = event.pos
+            elif event.type == pygame.MOUSEMOTION and is_dragging:
+                mouse_current_pos = event.pos
+            elif event.type == pygame.MOUSEBUTTONUP and is_dragging:
+                showText = False
+                is_dragging = False
+                missile.launch(mouse_start_pos, mouse_current_pos)
+
     if currState == GameStates.TRANSITION_TO_HOME:
         bodies.append(Body(20000, 491, 246, 0, 0, 10,
             pygame.transform.scale(pygame.image.load("images/redscale star.png").convert_alpha(), (168, 168)), True))
@@ -375,27 +387,61 @@ while running:
         missile.record_trail(offset_x=18, offset_y=24)
         missile.draw_trail(game_surface)
         missile.draw(game_surface)
+        
         for body in bodies:
             body.draw(game_surface)
         game_surface.blit(button, (280, 520))
         game_surface.blit(button, (618, 520))
-        game_surface.blit(button1Text, button1Rect)
-        game_surface.blit(button2Text, button2Rect)
+        game_surface.blit(playButtonText, playButtonRect)
+        game_surface.blit(tutorialButtonText, tutorialButtonRect)
         game_surface.blit(titleText, titleRect)
         game_surface.blit(subtitleText, subtitleRect)
 
     elif currState == GameStates.TRANSITION_TO_TUTORIAL:
         bodies.clear()
-        missile.reset(x=250, y=364)
+        missile.reset(x = 250, y = 364)
+        bodies = []
+        bodies.append(Body(20000, 583, 308, 0, 0, 10, surface = pygame.transform.scale(
+            pygame.image.load("images/redscale planet 1.png").convert_alpha(), (84, 84)
+        ),
+        anchor = True))
+        targets.append(Target(700, 364, target_surface))
         currState = GameStates.TUTORIAL
 
     elif currState == GameStates.TUTORIAL:
         game_surface.fill((35, 35, 55))
         for star_type, position in background_stars:
             game_surface.blit(star_images[star_type], position)
-        game_surface.blit(tutorialText, tutorialRect)
-        game_surface.blit(tutorialText2, tutorialRect2)
-        game_surface.blit(tutorialText3, tutorialRect3)
+
+        missile.update(bodies)
+        if missile.state == Missile.LAUNCH and is_dragging:
+            ddx = mouse_start_pos[0] - mouse_current_pos[0]
+            ddy = mouse_start_pos[1] - mouse_current_pos[1]
+            missile.draw_aimed(game_surface, ddx, ddy)
+        else:
+            missile.draw(game_surface)
+
+        missile.record_trail(18, 24)
+        missile.draw_trail(game_surface)
+
+        for t in targets:
+            t.draw(game_surface)
+            if t.state == Target.UNHIT and t.check_hit(missile):
+                t.state = Target.HIT
+        if all(t.state == Target.HIT for t in targets):
+            reset_field()
+        
+        for body in bodies:
+            body.draw(game_surface)
+        
+        if showText:
+            game_surface.blit(tutorialText, tutorialRect)
+            game_surface.blit(tutorialText2, tutorialRect2)
+            game_surface.blit(tutorialText3, tutorialRect3)
+            game_surface.blit(tutorialText4, tutorialRect4)
+
+        if is_dragging:
+            draw_launch_line(game_surface, missile, bodies, mouse_start_pos, mouse_current_pos)
 
     elif currState == GameStates.TRANSITION_TO_GAME:
         bodies.clear()
