@@ -1,11 +1,12 @@
 """
 TODO:
+FIX MOUSE WARP OFFSET
 Add multiple missiles
 Add planets/missile into tutorial
 Add buttons to leave tutorial and go back to home
 level progression
 comments
-powerups (black/white hole and thrusters)
+powerups (black/white hole and thrusters and nudgers)
 """
 #Import libraries
 import pygame
@@ -74,7 +75,31 @@ x = 30.0
 speed = 1.5
 font = pygame.font.SysFont(None, 16)
 # Claude's CRT shader ends
+'''
+# ── Mouse unwarp function ──────────────────────────────────────────────────── Made using Claude
+#Changes a CRT-warped screen position back to the original game surface so that cursor position for clicks works
+#Parameters: mx {integer} - x-value of the screen position, my {integer} - y-value of the screen position,
+#w {integer} - screen width, h {integer} - screen depth  
+#Return: px {integer} - equivalent x-value of the position on the unwarped game surface, py {integer} - equivalent y-value
+def unwarp_mouse(mx, my, w, h):
+    #Converts the pixel coordinates into normalized device coordinates from -1 to 1 - the shader uses this
+    ux = (mx / w) * 2.0 - 1.0
+    uy = (my / h) * 2.0 - 1.0
 
+    #Inverts the warp in 10 iterations by "guessing" the pre-warp position, using it to estimate
+    #the warp offset, dividing it out to refine the guess, and repeating
+    dx, dy = ux, uy
+    for _ in range(10):
+        ox = dy * dy * 0.26
+        oy = dx * dx * 0.2
+        dx = ux / (1.0 + ox)
+        dy = uy / (1.0 + oy)
+
+    #Converts back into pixel coordinates and returns them
+    px = (dx * 0.5 + 0.5) * w
+    py = (dy * 0.5 + 0.5) * h
+    return px, py
+'''
 #----------------------------------- CONSTANTS -----------------------------------#
 G = 0.2
 LAUNCH_MULT = 0.02
@@ -93,6 +118,11 @@ class GameStates(Enum):
 #----------------------------------- OTHER VARIABLES -----------------------------------#
 showText = True
 currState = GameStates.TRANSITION_TO_HOME
+timer = 0
+syncPlayButton = True
+syncTutorialButton = True
+syncHomeButton = True
+syncResetButton = True
 #----------------------------------- CLASSES -----------------------------------#
 #base class for all physics based objects
 class Body:
@@ -251,7 +281,6 @@ def draw_launch_line(surface, missile: Missile, planets: list[Body],
  
     if len(points) > 1:
         pygame.draw.lines(surface, (255, 1, 1), False, points, 2)
-
 #----------------------------------- ASSETS -----------------------------------#
 missile_image = pygame.transform.scale(pygame.image.load("images/redscale spaceship with flames 1.png").convert_alpha(), (MISSILE_W, MISSILE_H))
 target_surface = pygame.transform.scale(pygame.image.load("images/redscale target x.png").convert_alpha(), (MISSILE_W, MISSILE_H))
@@ -262,8 +291,15 @@ star_images = {i: pygame.transform.scale(pygame.image.load(f"images/redscale bac
 
 titleFont = pygame.font.Font("fonts/VCR_OSD_MONO_1.001.ttf", 192)
 smallerFont = pygame.font.Font("fonts/VCR_OSD_MONO_1.001.ttf", 32)
+smallerHighlightedFont = pygame.font.Font("fonts/VCR_OSD_MONO_1.001.ttf", 40)
 
 button = pygame.transform.scale(pygame.image.load("images/redscale button 1.png").convert_alpha(), (252, 63))
+homeButtonUnselected = pygame.transform.scale(pygame.image.load("images/home button unselected.png").convert_alpha(), (63, 63))
+homeButtonSelectedOn = pygame.transform.scale(pygame.image.load("images/home button selected on.png").convert_alpha(), (63, 63))
+homeButtonSelectedOff = pygame.transform.scale(pygame.image.load("images/home button selected off.png").convert_alpha(), (63, 63))
+resetButtonUnselected = pygame.transform.scale(pygame.image.load("images/reset button unselected.png").convert_alpha(), (63, 63))
+resetButtonSelectedOn = pygame.transform.scale(pygame.image.load("images/reset button selected on.png").convert_alpha(), (63, 63))
+resetButtonSelectedOff = pygame.transform.scale(pygame.image.load("images/reset button selected off.png").convert_alpha(), (63, 63))
 
 titleFont = pygame.font.Font("fonts/VCR_OSD_MONO_1.001.ttf", 192)
 titleText = titleFont.render("RED-EYE", True, (255, 1, 1))
@@ -273,19 +309,13 @@ subtitleFont = pygame.font.Font("fonts/VCR_OSD_MONO_1.001.ttf", 32)
 subtitleText = subtitleFont.render("BY PRANAV RAMANATHAN AND ROHAN RANJESH", True, (255, 1, 1))
 subtitleRect = subtitleText.get_rect(center = (575, 615))
 
-playButtonText = smallerFont.render("PLAY", True, (255, 1, 1))
-playButtonRect = playButtonText.get_rect(center = (406, 551))
-
-tutorialButtonText = smallerFont.render("TUTORIAL", True, (255, 1, 1))
-tutorialButtonRect = tutorialButtonText.get_rect(center = (744, 551))
-
 tutorialText = smallerFont.render("CLICK AND DRAG THE MISSILE TO PULL IT BACK AND LAUNCH IT", True, (255, 1, 1))
 tutorialRect = tutorialText.get_rect(center = (575, 50))
 
 tutorialText2 = smallerFont.render("ONCE YOU'VE LAUNCHED, THERE IS NO CONTROL", True, (255, 1, 1))
 tutorialRect2 = tutorialText2.get_rect(center = (575, 80))
 
-tutorialText3 = smallerFont.render("WATCH OUT FOR GRAVITATIONAL FIELDS", True, (255, 1, 1))
+tutorialText3 = smallerFont.render("WATCH OUT FOR GRAVITATIONAL FIELDS AND PRESS [R] TO RESET", True, (255, 1, 1))
 tutorialRect3 = tutorialText3.get_rect(center = (575, 110))
 
 tutorialText4 = smallerFont.render("AIM FOR THE TARGETS, LIEUTENANT", True, (255, 1, 1))
@@ -390,8 +420,35 @@ while running:
         
         for body in bodies:
             body.draw(game_surface)
-        game_surface.blit(button, (280, 520))
-        game_surface.blit(button, (618, 520))
+
+        mouseX, mouseY = pygame.mouse.get_pos()
+
+        if 280 < mouseX < 280 + 252 and 520 < mouseY < 520 + 63:
+            playButtonText = smallerHighlightedFont.render("PLAY", True, (255, 1, 1))
+            if syncPlayButton:
+                timer = 0
+                syncPlayButton = False
+            if timer % 1 < 0.5:
+                game_surface.blit(button, (280, 520))
+        else: 
+            game_surface.blit(button, (280, 520))
+            playButtonText = smallerFont.render("PLAY", True, (255, 1, 1))
+            syncPlayButton = True
+        if 618 < mouseX < 618 + 252 and 520 < mouseY < 520 + 63:
+            tutorialButtonText = smallerHighlightedFont.render("TUTORIAL", True, (255, 1, 1))
+            if syncTutorialButton:
+                timer = 0
+                syncTutorialButton = False
+            if timer % 1 < 0.5:
+                game_surface.blit(button, (618, 520))
+        else:
+            game_surface.blit(button, (618, 520))
+            tutorialButtonText = smallerFont.render("TUTORIAL", True, (255, 1, 1))
+            syncTutorialButton = True
+        
+        playButtonRect = playButtonText.get_rect(center = (406, 551))
+        tutorialButtonRect = tutorialButtonText.get_rect(center = (744, 551))
+
         game_surface.blit(playButtonText, playButtonRect)
         game_surface.blit(tutorialButtonText, tutorialButtonRect)
         game_surface.blit(titleText, titleRect)
@@ -443,6 +500,34 @@ while running:
         if is_dragging:
             draw_launch_line(game_surface, missile, bodies, mouse_start_pos, mouse_current_pos)
 
+        
+        mouseX, mouseY = pygame.mouse.get_pos()
+
+        if 30 < mouseX < (30 + 63) and 557 < mouseY < (557 + 63):
+            if syncResetButton:
+                timer = 0
+                syncResetButton = False
+            if timer % 1 < 0.5:
+                game_surface.blit(resetButtonSelectedOn, (30, 557))
+            else:
+                game_surface.blit(resetButtonSelectedOff, (30, 557))
+        else:
+            game_surface.blit(resetButtonUnselected, (30, 557))
+            syncResetButton = True
+
+        if 1057 < mouseX < (1057 + 63) and 557 < mouseY < (557 + 63):
+            if syncHomeButton:
+                timer = 0
+                syncHomeButton = False
+            if timer % 1 < 0.5:
+                game_surface.blit(homeButtonSelectedOn, (1057, 557))
+            else:
+                game_surface.blit(homeButtonSelectedOff, (1057, 557))
+        else:
+            game_surface.blit(homeButtonUnselected, (1057, 557))
+            syncHomeButton = True
+
+
     elif currState == GameStates.TRANSITION_TO_GAME:
         bodies.clear()
         bodies.append(Body(20000, 491, 246, 0, 0, 10,
@@ -483,6 +568,7 @@ while running:
     ctx.clear(0.0, 0.0, 0.0)
     vao.render()
     pygame.display.flip()
-    clock.tick(60)
+    increment = clock.tick(60) / 1000
+    timer += increment
 
 pygame.quit()
