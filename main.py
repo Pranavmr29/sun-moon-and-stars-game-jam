@@ -106,8 +106,8 @@ class GameStates(Enum):
 # x1, x2, y1, y2
 HOME_BTN   = (995, 1064, 531, 598)
 RESET_BTN   = (97, 154, 530, 587)
-BACK_BTN   = (158, 213, 537, 595)
-NEXT_BTN   = (938, 990, 538, 594)
+BACK_BTN   = (158, 213, 537, 595) #fix these
+NEXT_BTN   = (938, 990, 538, 594) #fix these
 #----------------------------------- OTHER VARIABLES -----------------------------------#
 #region variables
 showText = True
@@ -119,6 +119,7 @@ syncPlayButton = True
 syncTutorialButton = True
 syncHomeButton = True
 syncResetButton = True
+syncNextButton = True
 syncBackButton = True
 #----------------------------------- CLASSES -----------------------------------#
 #region classes
@@ -310,13 +311,13 @@ resetButtonUnselected = pygame.transform.scale(pygame.image.load("images/reset b
 resetButtonSelectedOn = pygame.transform.scale(pygame.image.load("images/reset button selected on.png").convert_alpha(), (63, 63))
 resetButtonSelectedOff = pygame.transform.scale(pygame.image.load("images/reset button selected off.png").convert_alpha(), (63, 63))
 
-backButtonUnselected = pygame.transform.scale(pygame.image.load("images/reset button unselected.png").convert_alpha(), (63, 63))
-backButtonSelectedOn = pygame.transform.scale(pygame.image.load("images/reset button selected on.png").convert_alpha(), (63, 63))
-backButtonSelectedOff = pygame.transform.scale(pygame.image.load("images/reset button selected off.png").convert_alpha(), (63, 63))
+backButtonUnselected = pygame.transform.scale(pygame.image.load("images/back button unselected.png").convert_alpha(), (63, 63))
+backButtonSelectedOn = pygame.transform.scale(pygame.image.load("images/back button selected on.png").convert_alpha(), (63, 63))
+backButtonSelectedOff = pygame.transform.scale(pygame.image.load("images/back button selected off.png").convert_alpha(), (63, 63))
 
-nextButtonUnselected = pygame.transform.scale(pygame.image.load("images/reset button unselected.png").convert_alpha(), (63, 63))
-nextButtonSelectedOn = pygame.transform.scale(pygame.image.load("images/reset button selected on.png").convert_alpha(), (63, 63))
-nextButtonSelectedOff = pygame.transform.scale(pygame.image.load("images/reset button selected off.png").convert_alpha(), (63, 63))
+nextButtonUnselected = pygame.transform.scale(pygame.image.load("images/next button unselected.png").convert_alpha(), (63, 63))
+nextButtonSelectedOn = pygame.transform.scale(pygame.image.load("images/next button selected on.png").convert_alpha(), (63, 63))
+nextButtonSelectedOff = pygame.transform.scale(pygame.image.load("images/next button selected off.png").convert_alpha(), (63, 63))
 
 titleFont = pygame.font.Font("fonts/VCR_OSD_MONO_1.001.ttf", 192)
 titleText = titleFont.render("RED-EYE", True, (255, 1, 1))
@@ -338,7 +339,7 @@ tutorialRect3 = tutorialText3.get_rect(center = (575, 110))
 tutorialText4 = smallerFont.render("AIM FOR THE TARGETS, LIEUTENANT", True, (255, 1, 1))
 tutorialRect4 = tutorialText4.get_rect(center = (575, 140))
 
-l1DoneText = smallerFont.render("LEVEL 1 COMPLETE: USE THE NEXT BUTTON TO CONTINUE", True, (255, 1, 1))
+l1DoneText = smallerFont.render("LEVEL COMPLETE: USE THE [->] BUTTON TO CONTINUE", True, (255, 1, 1))
 l1DoneRect = l1DoneText.get_rect(center = (575, 80))
 
 #----------------------------------- SCENE -----------------------------------#
@@ -656,18 +657,6 @@ while running:
         else:
             game_surface.blit(resetButtonUnselected, (30, 557))
             syncResetButton = True
-        
-        if in_bounds(mouseX, mouseY, BACK_BTN):
-            if syncBackButton:
-                timer = 0
-                syncBackButton = False
-            if timer % 1 < 0.5:
-                game_surface.blit(backButtonSelectedOn, (93, 557))
-            else:
-                game_surface.blit(backButtonSelectedOff, (93, 557))
-        else:
-            game_surface.blit(backButtonUnselected, (93, 557))
-            syncBackButton = True
 
         if in_bounds(mouseX, mouseY, HOME_BTN):
             if syncHomeButton:
@@ -686,12 +675,24 @@ while running:
                 timer = 0
                 syncNextButton = False
             if timer % 1 < 0.5:
-                game_surface.blit(nextButtonSelectedOn, (994, 557))
+                game_surface.blit(nextButtonSelectedOn, (1057, 474))
             else:
-                game_surface.blit(nextButtonSelectedOff, (994, 557))
+                game_surface.blit(nextButtonSelectedOff, (1057, 474))
         else:
-            game_surface.blit(nextButtonUnselected, (994, 557))
+            game_surface.blit(nextButtonUnselected, (1057, 474))
             syncNextButton = True
+
+        if in_bounds(mouseX, mouseY, BACK_BTN):
+            if syncBackButton:
+                timer = 0
+                syncBackButton = False
+            if timer % 1 < 0.5:
+                game_surface.blit(backButtonSelectedOn, (30, 474))
+            else:
+                game_surface.blit(backButtonSelectedOff, (30, 474))
+        else:
+            game_surface.blit(backButtonUnselected, (30, 474))
+            syncBackButton = True
 
     #region gpu
     # ── GPU upload ────────────────────────────────────────────────────
