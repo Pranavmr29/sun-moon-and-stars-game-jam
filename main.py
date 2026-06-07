@@ -75,31 +75,6 @@ x = 30.0
 speed = 1.5
 font = pygame.font.SysFont(None, 16)
 # Claude's CRT shader ends
-'''
-# ── Mouse unwarp function ──────────────────────────────────────────────────── Made using Claude
-#Changes a CRT-warped screen position back to the original game surface so that cursor position for clicks works
-#Parameters: mx {integer} - x-value of the screen position, my {integer} - y-value of the screen position,
-#w {integer} - screen width, h {integer} - screen depth  
-#Return: px {integer} - equivalent x-value of the position on the unwarped game surface, py {integer} - equivalent y-value
-def unwarp_mouse(mx, my, w, h):
-    #Converts the pixel coordinates into normalized device coordinates from -1 to 1 - the shader uses this
-    ux = (mx / w) * 2.0 - 1.0
-    uy = (my / h) * 2.0 - 1.0
-
-    #Inverts the warp in 10 iterations by "guessing" the pre-warp position, using it to estimate
-    #the warp offset, dividing it out to refine the guess, and repeating
-    dx, dy = ux, uy
-    for _ in range(10):
-        ox = dy * dy * 0.26
-        oy = dx * dx * 0.2
-        dx = ux / (1.0 + ox)
-        dy = uy / (1.0 + oy)
-
-    #Converts back into pixel coordinates and returns them
-    px = (dx * 0.5 + 0.5) * w
-    py = (dy * 0.5 + 0.5) * h
-    return px, py
-'''
 #----------------------------------- CONSTANTS -----------------------------------#
 G = 0.2
 LAUNCH_MULT = 0.02
@@ -115,6 +90,13 @@ class GameStates(Enum):
     TUTORIAL = "TUTORIAL"
     TRANSITION_TO_GAME = "T_GAME"
     GAME = "GAME"
+
+#the screen warp causes innacuracies in getting mouse position
+#so use these constants to line up mouse position with visual position of each button
+#only needed for corner and edge buttons because the warp is the most there
+# x1, x2, y1, y2
+HOME_BTN   = (995, 1064, 531, 598)
+RESET_BTN   = (97, 154, 530, 587)
 #----------------------------------- OTHER VARIABLES -----------------------------------#
 showText = True
 currState = GameStates.TRANSITION_TO_HOME
@@ -281,6 +263,10 @@ def draw_launch_line(surface, missile: Missile, planets: list[Body],
  
     if len(points) > 1:
         pygame.draw.lines(surface, (255, 1, 1), False, points, 2)
+
+def in_bounds(mx, my, bounds):
+    x1, x2, y1, y2 = bounds
+    return x1 < mx < x2 and y1 < my < y2
 #----------------------------------- ASSETS -----------------------------------#
 missile_image = pygame.transform.scale(pygame.image.load("images/redscale spaceship with flames 1.png").convert_alpha(), (MISSILE_W, MISSILE_H))
 target_surface = pygame.transform.scale(pygame.image.load("images/redscale target x.png").convert_alpha(), (MISSILE_W, MISSILE_H))
@@ -354,6 +340,7 @@ is_dragging = False
 mouse_start_pos = (0, 0)
 mouse_current_pos = (0, 0)
 
+count = 100
 # ── Loop ─────────────────────────────────────────────────────────────────────
 running = True
 while running:
@@ -390,11 +377,19 @@ while running:
         elif currState == GameStates.TUTORIAL:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r: reset_field()
-            if event.type == pygame.MOUSEBUTTONDOWN and missile.state == Missile.LAUNCH:
+                if event.key == pygame.K_SPACE: print(pygame.mouse.get_pos())
+            if event.type == pygame.MOUSEBUTTONDOWN:
                 mx, my = event.pos
-                if math.hypot(mx - missile.x, my - missile.y) < 40:
-                    is_dragging = True
-                    mouse_start_pos = mouse_current_pos = event.pos
+                if 30 <= mx <= 93 and 557 <= my <= 620:
+                    reset_field()
+                elif 1057 <= mx <= 1120 and 557 <= my <= 620:
+                    targets.clear()
+                    showText = True
+                    currState = GameStates.TRANSITION_TO_HOME
+                elif missile.state == Missile.LAUNCH:
+                    if math.hypot(mx - missile.x, my - missile.y) < 40:
+                        is_dragging = True
+                        mouse_start_pos = mouse_current_pos = (mx, my)
             elif event.type == pygame.MOUSEMOTION and is_dragging:
                 mouse_current_pos = event.pos
             elif event.type == pygame.MOUSEBUTTONUP and is_dragging:
@@ -423,7 +418,7 @@ while running:
 
         mouseX, mouseY = pygame.mouse.get_pos()
 
-        if 280 < mouseX < 280 + 252 and 520 < mouseY < 520 + 63:
+        if 280 < mouseX < 532 and 520 < mouseY < 583:
             playButtonText = smallerHighlightedFont.render("PLAY", True, (255, 1, 1))
             if syncPlayButton:
                 timer = 0
@@ -434,7 +429,8 @@ while running:
             game_surface.blit(button, (280, 520))
             playButtonText = smallerFont.render("PLAY", True, (255, 1, 1))
             syncPlayButton = True
-        if 618 < mouseX < 618 + 252 and 520 < mouseY < 520 + 63:
+        
+        if 618 < mouseX < 870 and 520 < mouseY < 583:
             tutorialButtonText = smallerHighlightedFont.render("TUTORIAL", True, (255, 1, 1))
             if syncTutorialButton:
                 timer = 0
@@ -503,7 +499,7 @@ while running:
         
         mouseX, mouseY = pygame.mouse.get_pos()
 
-        if 30 < mouseX < (30 + 63) and 557 < mouseY < (557 + 63):
+        if in_bounds(mouseX, mouseY, RESET_BTN):
             if syncResetButton:
                 timer = 0
                 syncResetButton = False
@@ -515,7 +511,7 @@ while running:
             game_surface.blit(resetButtonUnselected, (30, 557))
             syncResetButton = True
 
-        if 1057 < mouseX < (1057 + 63) and 557 < mouseY < (557 + 63):
+        if in_bounds(mouseX, mouseY, HOME_BTN):
             if syncHomeButton:
                 timer = 0
                 syncHomeButton = False
