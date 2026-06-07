@@ -318,14 +318,14 @@ tutorialRect2 = tutorialText2.get_rect(center = (575, 80))
 tutorialText3 = smallerFont.render("WATCH OUT FOR GRAVITATIONAL FIELDS AND PRESS [R] TO RESET", True, (255, 1, 1))
 tutorialRect3 = tutorialText3.get_rect(center = (575, 110))
 
-tutorialText4 = smallerFont.render("THE LAUNCH LINE GIVES YOU AN APPROXIMATION", True, (255, 1, 1))
-tutorialRect4 = tutorialText4.get_rect(center = (575, 140))
+#tutorialText4 = smallerFont.render("THE LAUNCH LINE GIVES YOU AN APPROXIMATION", True, (255, 1, 1))
+#tutorialRect4 = tutorialText4.get_rect(center = (575, 140))
 
-tutorialText5 = smallerFont.render("YOU MUST USE YOUR INTUITION TO SUCCEED", True, (255, 1, 1))
-tutorialRect5 = tutorialText5.get_rect(center = (575, 170))
+#tutorialText5 = smallerFont.render("YOU MUST USE YOUR INTUITION TO SUCCEED", True, (255, 1, 1))
+#tutorialRect5 = tutorialText5.get_rect(center = (575, 170))
 
 tutorialText6 = smallerFont.render("AIM FOR THE TARGETS, LIEUTENANT", True, (255, 1, 1))
-tutorialRect6 = tutorialText6.get_rect(center = (575, 200))
+tutorialRect6 = tutorialText6.get_rect(center = (575, 140))
 
 #----------------------------------- SCENE -----------------------------------#
 #region scene
@@ -531,8 +531,8 @@ while running:
             game_surface.blit(tutorialText, tutorialRect)
             game_surface.blit(tutorialText2, tutorialRect2)
             game_surface.blit(tutorialText3, tutorialRect3)
-            game_surface.blit(tutorialText4, tutorialRect4)
-            game_surface.blit(tutorialText5, tutorialRect5)
+            #game_surface.blit(tutorialText4, tutorialRect4)
+            #game_surface.blit(tutorialText5, tutorialRect5)
             game_surface.blit(tutorialText6, tutorialRect6)
 
         if is_dragging:
@@ -600,6 +600,34 @@ while running:
             reset_field()
         if is_dragging:
             draw_launch_line(game_surface, missile, bodies, mouse_start_pos, mouse_current_pos)
+
+        infoText = smallerFont.render("LEVEL: [" + str(1) + "] | LAUNCHES LEFT: [" + str(1) + "]", True, (255, 1, 1))
+        infoRect = infoText.get_rect(center = (575, 615))
+        game_surface.blit(infoText, infoRect)
+
+        if in_bounds(mouseX, mouseY, RESET_BTN):
+            if syncResetButton:
+                timer = 0
+                syncResetButton = False
+            if timer % 1 < 0.5:
+                game_surface.blit(resetButtonSelectedOn, (30, 557))
+            else:
+                game_surface.blit(resetButtonSelectedOff, (30, 557))
+        else:
+            game_surface.blit(resetButtonUnselected, (30, 557))
+            syncResetButton = True
+
+        if in_bounds(mouseX, mouseY, HOME_BTN):
+            if syncHomeButton:
+                timer = 0
+                syncHomeButton = False
+            if timer % 1 < 0.5:
+                game_surface.blit(homeButtonSelectedOn, (1057, 557))
+            else:
+                game_surface.blit(homeButtonSelectedOff, (1057, 557))
+        else:
+            game_surface.blit(homeButtonUnselected, (1057, 557))
+            syncHomeButton = True
 
     #region gpu
     # ── GPU upload ────────────────────────────────────────────────────
