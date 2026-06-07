@@ -1,8 +1,6 @@
 """
 TODO:
-FIX MOUSE WARP OFFSET
 Add multiple missiles
-Add planets/missile into tutorial
 Add buttons to leave tutorial and go back to home
 level progression
 comments
@@ -91,8 +89,16 @@ class GameStates(Enum):
     HOME = "HOME"
     TRANSITION_TO_TUTORIAL = "T_TUTORIAL"
     TUTORIAL = "TUTORIAL"
-    TRANSITION_TO_GAME = "T_GAME"
-    GAME = "GAME"
+    TRANSITION_TO_L1 = "T_L1"
+    L1 = "L1"
+    TRANSITION_TO_L2 = "T_L2"
+    L2 = "L2"
+    TRANSITION_TO_L3 = "T_L3"
+    L3 = "L3"
+    TRANSITION_TO_L4 = "T_L4"
+    L4 = "L4"
+    TRANSITION_TO_L5 = "T_L5"
+    L5 = "L5"
 
 #the screen warp causes innacuracies in getting mouse position
 #so use these constants to line up mouse position with visual position of each button
@@ -377,10 +383,10 @@ while running:
                 if (618 <= mx <= 870) and (519 <= my <= 583):
                     currState = GameStates.TRANSITION_TO_TUTORIAL
                 if (280 <= mx <= 532) and (519 <= my <= 583):
-                    currState = GameStates.TRANSITION_TO_GAME
+                    currState = GameStates.TRANSITION_TO_L1
 
-        #region game inputs
-        elif currState == GameStates.GAME:
+        #region L1 inputs
+        elif currState == GameStates.L1:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r: reset_field()
                 if event.key == pygame.K_RIGHT: missile.vx += 10
@@ -405,11 +411,12 @@ while running:
                 if event.key == pygame.K_SPACE: print(pygame.mouse.get_pos())
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mx, my = event.pos
-                if 30 <= mx <= 93 and 557 <= my <= 620:
-                    reset_field()
-                elif 1057 <= mx <= 1120 and 557 <= my <= 620:
-                    targets.clear()
+                if in_bounds(mx, my, RESET_BTN):
+                    tutorialTargets = 3
+                    reset = True
+                elif in_bounds(mx, my, HOME_BTN):
                     showText = True
+                    missile.state = Missile.LAUNCH
                     currState = GameStates.TRANSITION_TO_HOME
                 elif missile.state == Missile.LAUNCH:
                     if math.hypot(mx - missile.x, my - missile.y) < 40:
@@ -424,10 +431,14 @@ while running:
 
     #region t_home
     if currState == GameStates.TRANSITION_TO_HOME:
+        missile.reset(x = 557, y = 40)
+        missile.trail = []
+        missile.vx = 4.35
+        missile.state = Missile.FREE
+        bodies.clear()
         bodies.append(Body(20000, 491, 246, 0, 0, 10,
             pygame.transform.scale(pygame.image.load("images/redscale star.png").convert_alpha(), (168, 168)), True))
-        missile.state = Missile.FREE
-        missile.vx = 4.35
+        targets.clear()
         currState = GameStates.HOME
 
     #region home
@@ -565,16 +576,16 @@ while running:
             game_surface.blit(homeButtonUnselected, (1057, 557))
             syncHomeButton = True
 
-    #region t_game
-    elif currState == GameStates.TRANSITION_TO_GAME:
+    #region t_L1
+    elif currState == GameStates.TRANSITION_TO_L1:
         bodies.clear()
         bodies.append(Body(20000, 491, 246, 0, 0, 10,
             pygame.transform.scale(pygame.image.load("images/redscale planet 1.png").convert_alpha(), (84, 84)), True))
         missile.reset(x=250, y=364)
-        currState = GameStates.GAME
+        currState = GameStates.L1
 
-    #region game
-    elif currState == GameStates.GAME:
+    #region L1
+    elif currState == GameStates.L1:
         missile.update(bodies)
         for body in bodies:
             others = [b for b in bodies if b is not body]
