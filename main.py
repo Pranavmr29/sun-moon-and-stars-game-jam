@@ -106,6 +106,8 @@ class GameStates(Enum):
 # x1, x2, y1, y2
 HOME_BTN   = (995, 1064, 531, 598)
 RESET_BTN   = (97, 154, 530, 587)
+BACK_BTN   = (158, 213, 537, 595)
+NEXT_BTN   = (938, 990, 538, 594)
 #----------------------------------- OTHER VARIABLES -----------------------------------#
 #region variables
 showText = True
@@ -117,6 +119,7 @@ syncPlayButton = True
 syncTutorialButton = True
 syncHomeButton = True
 syncResetButton = True
+syncBackButton = True
 #----------------------------------- CLASSES -----------------------------------#
 #region classes
 #base class for all physics based objects
@@ -307,6 +310,14 @@ resetButtonUnselected = pygame.transform.scale(pygame.image.load("images/reset b
 resetButtonSelectedOn = pygame.transform.scale(pygame.image.load("images/reset button selected on.png").convert_alpha(), (63, 63))
 resetButtonSelectedOff = pygame.transform.scale(pygame.image.load("images/reset button selected off.png").convert_alpha(), (63, 63))
 
+backButtonUnselected = pygame.transform.scale(pygame.image.load("images/reset button unselected.png").convert_alpha(), (63, 63))
+backButtonSelectedOn = pygame.transform.scale(pygame.image.load("images/reset button selected on.png").convert_alpha(), (63, 63))
+backButtonSelectedOff = pygame.transform.scale(pygame.image.load("images/reset button selected off.png").convert_alpha(), (63, 63))
+
+nextButtonUnselected = pygame.transform.scale(pygame.image.load("images/reset button unselected.png").convert_alpha(), (63, 63))
+nextButtonSelectedOn = pygame.transform.scale(pygame.image.load("images/reset button selected on.png").convert_alpha(), (63, 63))
+nextButtonSelectedOff = pygame.transform.scale(pygame.image.load("images/reset button selected off.png").convert_alpha(), (63, 63))
+
 titleFont = pygame.font.Font("fonts/VCR_OSD_MONO_1.001.ttf", 192)
 titleText = titleFont.render("RED-EYE", True, (255, 1, 1))
 titleRect = titleText.get_rect(center = (575, 100))
@@ -324,14 +335,11 @@ tutorialRect2 = tutorialText2.get_rect(center = (575, 80))
 tutorialText3 = smallerFont.render("WATCH OUT FOR GRAVITATIONAL FIELDS AND PRESS [R] TO RESET", True, (255, 1, 1))
 tutorialRect3 = tutorialText3.get_rect(center = (575, 110))
 
-#tutorialText4 = smallerFont.render("THE LAUNCH LINE GIVES YOU AN APPROXIMATION", True, (255, 1, 1))
-#tutorialRect4 = tutorialText4.get_rect(center = (575, 140))
+tutorialText4 = smallerFont.render("AIM FOR THE TARGETS, LIEUTENANT", True, (255, 1, 1))
+tutorialRect4 = tutorialText4.get_rect(center = (575, 140))
 
-#tutorialText5 = smallerFont.render("YOU MUST USE YOUR INTUITION TO SUCCEED", True, (255, 1, 1))
-#tutorialRect5 = tutorialText5.get_rect(center = (575, 170))
-
-tutorialText6 = smallerFont.render("AIM FOR THE TARGETS, LIEUTENANT", True, (255, 1, 1))
-tutorialRect6 = tutorialText6.get_rect(center = (575, 140))
+l1DoneText = smallerFont.render("LEVEL 1 COMPLETE: USE THE NEXT BUTTON TO CONTINUE", True, (255, 1, 1))
+l1DoneRect = l1DoneText.get_rect(center = (575, 80))
 
 #----------------------------------- SCENE -----------------------------------#
 #region scene
@@ -388,16 +396,18 @@ while running:
         #region L1 inputs
         elif currState == GameStates.L1:
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_r: reset_field()
-                if event.key == pygame.K_RIGHT: missile.vx += 10
-                if event.key == pygame.K_LEFT: missile.vx -= 10
-                if event.key == pygame.K_UP: missile.vy -= 10
-                if event.key == pygame.K_DOWN: missile.vy += 10
-            elif event.type == pygame.MOUSEBUTTONDOWN and missile.state == Missile.LAUNCH:
+                if event.key == pygame.K_r: reset = True
+                if event.key == pygame.K_SPACE: print(pygame.mouse.get_pos())
+            if event.type == pygame.MOUSEBUTTONDOWN:
                 mx, my = event.pos
-                if math.hypot(mx - missile.x, my - missile.y) < 40:
-                    is_dragging = True
-                    mouse_start_pos = mouse_current_pos = event.pos
+                if in_bounds(mx, my, RESET_BTN):
+                    currState = GameStates.TRANSITION_TO_L1
+                elif in_bounds(mx, my, HOME_BTN):
+                    currState = GameStates.TRANSITION_TO_HOME
+                elif missile.state == Missile.LAUNCH:
+                    if math.hypot(mx - missile.x, my - missile.y) < 40:
+                        is_dragging = True
+                        mouse_start_pos = mouse_current_pos = event.pos
             elif event.type == pygame.MOUSEMOTION and is_dragging:
                 mouse_current_pos = event.pos
             elif event.type == pygame.MOUSEBUTTONUP and is_dragging:
@@ -408,15 +418,11 @@ while running:
         elif currState == GameStates.TUTORIAL:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r: reset = True
-                if event.key == pygame.K_SPACE: print(pygame.mouse.get_pos())
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mx, my = event.pos
                 if in_bounds(mx, my, RESET_BTN):
-                    tutorialTargets = 3
-                    reset = True
+                    currState = GameStates.TRANSITION_TO_TUTORIAL
                 elif in_bounds(mx, my, HOME_BTN):
-                    showText = True
-                    missile.state = Missile.LAUNCH
                     currState = GameStates.TRANSITION_TO_HOME
                 elif missile.state == Missile.LAUNCH:
                     if math.hypot(mx - missile.x, my - missile.y) < 40:
@@ -490,7 +496,7 @@ while running:
 
     #region t_tutorial
     elif currState == GameStates.TRANSITION_TO_TUTORIAL:
-        tutorialTargets = 3
+        numTargets = 3
         bodies.clear()
         missile.reset(x = 250, y = 364)
         bodies = []
@@ -498,6 +504,7 @@ while running:
             pygame.image.load("images/redscale planet 1.png").convert_alpha(), (84, 84)
         ),
         anchor = True))
+        targets.clear()
         targets.append(Target(710, 355, target_surface))
         currState = GameStates.TUTORIAL
 
@@ -523,16 +530,16 @@ while running:
             if t.state == Target.UNHIT and t.check_hit(missile):
                 t.state = Target.HIT
         if all(t.state == Target.HIT for t in targets):
-            tutorialTargets -= 1
+            numTargets -= 1
             reset = True
 
         if reset:
             reset = False
-            if tutorialTargets == 3:
+            if numTargets == 3:
                 reset_field(710, 355)
-            elif tutorialTargets == 2:
+            elif numTargets == 2:
                 reset_field(650, 200)
-            elif tutorialTargets == 1:
+            elif numTargets == 1:
                 reset_field(950, 325)
         
         for body in bodies:
@@ -542,9 +549,7 @@ while running:
             game_surface.blit(tutorialText, tutorialRect)
             game_surface.blit(tutorialText2, tutorialRect2)
             game_surface.blit(tutorialText3, tutorialRect3)
-            #game_surface.blit(tutorialText4, tutorialRect4)
-            #game_surface.blit(tutorialText5, tutorialRect5)
-            game_surface.blit(tutorialText6, tutorialRect6)
+            game_surface.blit(tutorialText4, tutorialRect4)
 
         if is_dragging:
             draw_launch_line(game_surface, missile, bodies, mouse_start_pos, mouse_current_pos)
@@ -579,42 +584,66 @@ while running:
     #region t_L1
     elif currState == GameStates.TRANSITION_TO_L1:
         bodies.clear()
-        bodies.append(Body(20000, 491, 246, 0, 0, 10,
+        bodies.append(Body(20000, 541, 308, 0, 0, 10,
             pygame.transform.scale(pygame.image.load("images/redscale planet 1.png").convert_alpha(), (84, 84)), True))
-        missile.reset(x=250, y=364)
+        bodies.append(Body(6000, 541, 158, -5, 0, 5,
+            pygame.transform.scale(pygame.image.load("images/redscale moon.png").convert_alpha(), (42, 42))))
+        
+        missile.reset(x = 250, y = 364)
+
+        targets.clear()
+        targets.append(Target(710, 355, target_surface))
+        numTargets = 1
+
+        showText = False
         currState = GameStates.L1
 
     #region L1
     elif currState == GameStates.L1:
-        missile.update(bodies)
-        for body in bodies:
-            others = [b for b in bodies if b is not body]
-            body.update(others)
+        mouseX, mouseY = pygame.mouse.get_pos()
         game_surface.fill((35, 35, 55))
         for star_type, position in background_stars:
             game_surface.blit(star_images[star_type], position)
+
+        missile.update(bodies)
         if missile.state == Missile.LAUNCH and is_dragging:
             ddx = mouse_start_pos[0] - mouse_current_pos[0]
             ddy = mouse_start_pos[1] - mouse_current_pos[1]
             missile.draw_aimed(game_surface, ddx, ddy)
         else:
             missile.draw(game_surface)
-        missile.record_trail(offset_x=18, offset_y=24)
+
+        missile.record_trail(18, 24)
         missile.draw_trail(game_surface)
-        for body in bodies:
-            body.draw(game_surface)
-        for target in targets:
-            target.draw(game_surface)
-            if target.state == Target.UNHIT and target.check_hit(missile):
-                target.state = Target.HIT
-        if all(t.state == Target.HIT for t in targets):
-            reset_field()
         if is_dragging:
             draw_launch_line(game_surface, missile, bodies, mouse_start_pos, mouse_current_pos)
+
+        for body in bodies:
+            others = [b for b in bodies if b is not body]
+            body.update(others)
+            body.draw(game_surface)
+
+        for t in targets:
+            t.draw(game_surface)
+            if t.state == Target.UNHIT and t.check_hit(missile):
+                t.state = Target.HIT
+        if all(t.state == Target.HIT for t in targets):
+            numTargets -= 1
+            reset = True
+
+        if reset:
+            reset = False
+            if numTargets == 1:
+                reset_field(710, 355)
+            elif numTargets == 0:
+                showText = True
 
         infoText = smallerFont.render("LEVEL: [" + str(1) + "] | LAUNCHES LEFT: [" + str(1) + "]", True, (255, 1, 1))
         infoRect = infoText.get_rect(center = (575, 615))
         game_surface.blit(infoText, infoRect)
+    
+        if showText:
+            game_surface.blit(l1DoneText, l1DoneRect)
 
         if in_bounds(mouseX, mouseY, RESET_BTN):
             if syncResetButton:
@@ -627,6 +656,18 @@ while running:
         else:
             game_surface.blit(resetButtonUnselected, (30, 557))
             syncResetButton = True
+        
+        if in_bounds(mouseX, mouseY, BACK_BTN):
+            if syncBackButton:
+                timer = 0
+                syncBackButton = False
+            if timer % 1 < 0.5:
+                game_surface.blit(backButtonSelectedOn, (93, 557))
+            else:
+                game_surface.blit(backButtonSelectedOff, (93, 557))
+        else:
+            game_surface.blit(backButtonUnselected, (93, 557))
+            syncBackButton = True
 
         if in_bounds(mouseX, mouseY, HOME_BTN):
             if syncHomeButton:
@@ -639,6 +680,18 @@ while running:
         else:
             game_surface.blit(homeButtonUnselected, (1057, 557))
             syncHomeButton = True
+
+        if in_bounds(mouseX, mouseY, NEXT_BTN):
+            if syncNextButton:
+                timer = 0
+                syncNextButton = False
+            if timer % 1 < 0.5:
+                game_surface.blit(nextButtonSelectedOn, (994, 557))
+            else:
+                game_surface.blit(nextButtonSelectedOff, (994, 557))
+        else:
+            game_surface.blit(nextButtonUnselected, (994, 557))
+            syncNextButton = True
 
     #region gpu
     # ── GPU upload ────────────────────────────────────────────────────
