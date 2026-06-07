@@ -105,6 +105,8 @@ RESET_BTN   = (97, 154, 530, 587)
 showText = True
 currState = GameStates.TRANSITION_TO_HOME
 timer = 0
+reset = False
+
 syncPlayButton = True
 syncTutorialButton = True
 syncHomeButton = True
@@ -229,9 +231,11 @@ class Target:
         offset = (int(missile.x - self.x), int(missile.y - self.y))
         return self.mask.overlap(missile.mask, offset) is not None
 
-    def reset(self):
-        self.x = random.randint(50, 1200)
-        self.y = random.randint(50, 650)
+    def reset(self, x = 0, y = 0):
+        if x == 0: self.x = random.randint(50, 1100)
+        else: self.x = x
+        if y == 0: self.y = random.randint(50, 600)
+        else: self.y = y
         self.state = Target.UNHIT
 
     def draw(self, surface):
@@ -314,8 +318,14 @@ tutorialRect2 = tutorialText2.get_rect(center = (575, 80))
 tutorialText3 = smallerFont.render("WATCH OUT FOR GRAVITATIONAL FIELDS AND PRESS [R] TO RESET", True, (255, 1, 1))
 tutorialRect3 = tutorialText3.get_rect(center = (575, 110))
 
-tutorialText4 = smallerFont.render("AIM FOR THE TARGETS, LIEUTENANT", True, (255, 1, 1))
+tutorialText4 = smallerFont.render("THE LAUNCH LINE GIVES YOU AN APPROXIMATION", True, (255, 1, 1))
 tutorialRect4 = tutorialText4.get_rect(center = (575, 140))
+
+tutorialText5 = smallerFont.render("YOU MUST USE YOUR INTUITION TO SUCCEED", True, (255, 1, 1))
+tutorialRect5 = tutorialText5.get_rect(center = (575, 170))
+
+tutorialText6 = smallerFont.render("AIM FOR THE TARGETS, LIEUTENANT", True, (255, 1, 1))
+tutorialRect6 = tutorialText6.get_rect(center = (575, 200))
 
 #----------------------------------- SCENE -----------------------------------#
 #region scene
@@ -341,9 +351,11 @@ missile = Missile(x = 557, y = 50, image = missile_image)
 targets: list[Target] = []
  
  
-def reset_field():
+def reset_field(tx = 0, ty = 0):
+    tx = 0 if tx == 0 else tx
+    ty = 0 if ty == 0 else ty
     for t in targets:
-        t.reset()
+        t.reset(x = tx, y = ty)
     missile.reset(x = 250, y = 364)
 
 
@@ -389,7 +401,7 @@ while running:
         #region tutorial inputs
         elif currState == GameStates.TUTORIAL:
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_r: reset_field()
+                if event.key == pygame.K_r: reset = True
                 if event.key == pygame.K_SPACE: print(pygame.mouse.get_pos())
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mx, my = event.pos
@@ -467,14 +479,15 @@ while running:
 
     #region t_tutorial
     elif currState == GameStates.TRANSITION_TO_TUTORIAL:
+        tutorialTargets = 3
         bodies.clear()
         missile.reset(x = 250, y = 364)
         bodies = []
-        bodies.append(Body(20000, 583, 308, 0, 0, 10, surface = pygame.transform.scale(
+        bodies.append(Body(20000, 541, 308, 0, 0, 10, surface = pygame.transform.scale(
             pygame.image.load("images/redscale planet 1.png").convert_alpha(), (84, 84)
         ),
         anchor = True))
-        targets.append(Target(700, 364, target_surface))
+        targets.append(Target(710, 355, target_surface))
         currState = GameStates.TUTORIAL
 
     #region tutorial
@@ -499,7 +512,17 @@ while running:
             if t.state == Target.UNHIT and t.check_hit(missile):
                 t.state = Target.HIT
         if all(t.state == Target.HIT for t in targets):
-            reset_field()
+            tutorialTargets -= 1
+            reset = True
+
+        if reset:
+            reset = False
+            if tutorialTargets == 3:
+                reset_field(710, 355)
+            elif tutorialTargets == 2:
+                reset_field(650, 200)
+            elif tutorialTargets == 1:
+                reset_field(950, 325)
         
         for body in bodies:
             body.draw(game_surface)
@@ -509,6 +532,8 @@ while running:
             game_surface.blit(tutorialText2, tutorialRect2)
             game_surface.blit(tutorialText3, tutorialRect3)
             game_surface.blit(tutorialText4, tutorialRect4)
+            game_surface.blit(tutorialText5, tutorialRect5)
+            game_surface.blit(tutorialText6, tutorialRect6)
 
         if is_dragging:
             draw_launch_line(game_surface, missile, bodies, mouse_start_pos, mouse_current_pos)
