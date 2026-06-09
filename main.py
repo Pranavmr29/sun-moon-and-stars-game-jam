@@ -530,13 +530,13 @@ l1DoneText = smallerFont.render("LEVEL COMPLETE: USE THE [->] BUTTON TO CONTINUE
 l1DoneRect = l1DoneText.get_rect(center = (575, 80))
 
 boostText = smallerFont.render("NEW UPGRADE UNLOCKED: BOOST", True, (255, 1, 1))
-boostRect = boostText.get_rect(center = (575, 80))
+boostRect = boostText.get_rect(center = (575, 60))
 
 boostText2 = smallerFont.render("PRESS SPACE TO GIVE THE MISSILE AN EXTRA BOOST", True, (255, 1, 1))
-boostRect2 = boostText2.get_rect(center = (575, 110))
+boostRect2 = boostText2.get_rect(center = (575, 90))
 
 boostText3 = smallerFont.render("YOU CAN USE YOUR BOOST TO ESCAPE ORBIT", True, (255, 1, 1))
-boostRect3 = boostText2.get_rect(center = (575, 110))
+boostRect3 = boostText3.get_rect(center = (575, 60))
 
 nudgeText = smallerFont.render("NEW UPGRADE UNLOCKED: NUDGE", True, (255, 1, 1))
 nudgeRect = nudgeText.get_rect(center = (575, 60))
