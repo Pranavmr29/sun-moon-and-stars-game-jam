@@ -127,7 +127,7 @@ syncNextButton = True
 syncBackButton = True
 
 missileLevelPos = (0,0)
-unlockedLevels = [1, 2, 3, 4, 5]
+unlockedLevels = [1,2,3,4,5]
 
 explosion_active = False
 explosion_pos = (0, 0)
@@ -1115,14 +1115,28 @@ while running:
     #region t_L4
     elif currState == GameStates.TRANSITION_TO_L4:
         bodies.clear()
-        bodies.append(Body(20000, 450, 200, 0, 0, 10, pygame.transform.scale(pygame.image.load("images/redscale planet 2.png").convert_alpha(), (84, 84)), anchor=True, collider=True))
-        bodies.append(Body(20000, 700, 400, 0, 0, 10, pygame.transform.scale(pygame.image.load("images/redscale planet 3.png").convert_alpha(), (84, 84)), anchor=True, collider=True))
-        missile.reset(x = 250, y = 364)
-        missileLevelPos = (250, 364)
+        bodies.append(Body(50000, 442, 480, 0, 0, 10, pygame.transform.scale(pygame.image.load("images/redscale planet 2.png").convert_alpha(), (84, 84)), True, True))
+        bodies.append(Body(500, 442, 400, 0, 0, 5, pygame.transform.scale(pygame.image.load("images/redscale planet 1.png").convert_alpha(), (42, 42)), True, True))
+        bodies.append(Body(500, 442, 340, 0, 0, 5, pygame.transform.scale(pygame.image.load("images/redscale planet 1.png").convert_alpha(), (42, 42)), True, True))
+        bodies.append(Body(500, 442, 280, 0, 0, 5, pygame.transform.scale(pygame.image.load("images/redscale planet 1.png").convert_alpha(), (42, 42)), True, True))
+        bodies.append(Body(500, 442, 220, 0, 0, 5, pygame.transform.scale(pygame.image.load("images/redscale planet 1.png").convert_alpha(), (42, 42)), True, True))
+        bodies.append(Body(500, 442, 160, 0, 0, 5, pygame.transform.scale(pygame.image.load("images/redscale planet 1.png").convert_alpha(), (42, 42)), True, True))
+        bodies.append(Body(500, 442, 100, 0, 0, 5, pygame.transform.scale(pygame.image.load("images/redscale planet 1.png").convert_alpha(), (42, 42)), True, True))
+
+        bodies.append(Body(50000, 700, 120, 0, 0, 10, pygame.transform.scale(pygame.image.load("images/redscale planet 3.png").convert_alpha(), (84, 84)), True, True))
+        bodies.append(Body(500, 700, 200, 0, 0, 5, pygame.transform.scale(pygame.image.load("images/redscale planet 1.png").convert_alpha(), (42, 42)), True, True))
+        bodies.append(Body(500, 700, 260, 0, 0, 5, pygame.transform.scale(pygame.image.load("images/redscale planet 1.png").convert_alpha(), (42, 42)), True, True))
+        bodies.append(Body(500, 700, 320, 0, 0, 5, pygame.transform.scale(pygame.image.load("images/redscale planet 1.png").convert_alpha(), (42, 42)), True, True))
+        bodies.append(Body(500, 700, 380, 0, 0, 5, pygame.transform.scale(pygame.image.load("images/redscale planet 1.png").convert_alpha(), (42, 42)), True, True))
+        bodies.append(Body(500, 700, 440, 0, 0, 5, pygame.transform.scale(pygame.image.load("images/redscale planet 1.png").convert_alpha(), (42, 42)), True, True))
+        bodies.append(Body(500, 700, 500, 0, 0, 5, pygame.transform.scale(pygame.image.load("images/redscale planet 1.png").convert_alpha(), (42, 42)), True, True))
+
+        missile.reset(x = 230, y = 320)
+        missileLevelPos = (230, 320)
 
         targets.clear()
-        targets.append(Target(525, 200, target_surface))
-        targets.append(Target(775, 400, target_surface))
+        
+        targets.append(Target(850, 320, target_surface))
 
         showText = False
         levelDone = False
@@ -1183,8 +1197,8 @@ while running:
             levelDone = False
             showText = True
             missile.reset(missileLevelPos[0], missileLevelPos[1])
-            if 5 not in unlockedLevels:
-                unlockedLevels.append(5)
+            if 4 not in unlockedLevels:
+                unlockedLevels.append(4)
 
         infoText = smallerFont.render("LEVEL: [4]", True, (255, 1, 1))
         infoRect = infoText.get_rect(center = (575, 615))
@@ -1242,32 +1256,17 @@ while running:
             game_surface.blit(backButtonUnselected, (30, 474))
             syncBackButton = True
 
-
     #region t_L5
     elif currState == GameStates.TRANSITION_TO_L5:
         bodies.clear()
-        bodies.append(Body(50000, 442, 480, 0, 0, 10, pygame.transform.scale(pygame.image.load("images/redscale planet 2.png").convert_alpha(), (84, 84)), True, True))
-        bodies.append(Body(500, 442, 400, 0, 0, 5, pygame.transform.scale(pygame.image.load("images/redscale planet 1.png").convert_alpha(), (42, 42)), True, True))
-        bodies.append(Body(500, 442, 340, 0, 0, 5, pygame.transform.scale(pygame.image.load("images/redscale planet 1.png").convert_alpha(), (42, 42)), True, True))
-        bodies.append(Body(500, 442, 280, 0, 0, 5, pygame.transform.scale(pygame.image.load("images/redscale planet 1.png").convert_alpha(), (42, 42)), True, True))
-        bodies.append(Body(500, 442, 220, 0, 0, 5, pygame.transform.scale(pygame.image.load("images/redscale planet 1.png").convert_alpha(), (42, 42)), True, True))
-        bodies.append(Body(500, 442, 160, 0, 0, 5, pygame.transform.scale(pygame.image.load("images/redscale planet 1.png").convert_alpha(), (42, 42)), True, True))
-        bodies.append(Body(500, 442, 100, 0, 0, 5, pygame.transform.scale(pygame.image.load("images/redscale planet 1.png").convert_alpha(), (42, 42)), True, True))
-
-        bodies.append(Body(50000, 700, 120, 0, 0, 10, pygame.transform.scale(pygame.image.load("images/redscale planet 3.png").convert_alpha(), (84, 84)), True, True))
-        bodies.append(Body(500, 700, 200, 0, 0, 5, pygame.transform.scale(pygame.image.load("images/redscale planet 1.png").convert_alpha(), (42, 42)), True, True))
-        bodies.append(Body(500, 700, 260, 0, 0, 5, pygame.transform.scale(pygame.image.load("images/redscale planet 1.png").convert_alpha(), (42, 42)), True, True))
-        bodies.append(Body(500, 700, 320, 0, 0, 5, pygame.transform.scale(pygame.image.load("images/redscale planet 1.png").convert_alpha(), (42, 42)), True, True))
-        bodies.append(Body(500, 700, 380, 0, 0, 5, pygame.transform.scale(pygame.image.load("images/redscale planet 1.png").convert_alpha(), (42, 42)), True, True))
-        bodies.append(Body(500, 700, 440, 0, 0, 5, pygame.transform.scale(pygame.image.load("images/redscale planet 1.png").convert_alpha(), (42, 42)), True, True))
-        bodies.append(Body(500, 700, 500, 0, 0, 5, pygame.transform.scale(pygame.image.load("images/redscale planet 1.png").convert_alpha(), (42, 42)), True, True))
-
-        missile.reset(x = 230, y = 320)
-        missileLevelPos = (230, 320)
+        bodies.append(Body(20000, 450, 200, 0, 0, 10, pygame.transform.scale(pygame.image.load("images/redscale planet 2.png").convert_alpha(), (84, 84)), anchor=True, collider=True))
+        bodies.append(Body(20000, 700, 400, 0, 0, 10, pygame.transform.scale(pygame.image.load("images/redscale planet 3.png").convert_alpha(), (84, 84)), anchor=True, collider=True))
+        missile.reset(x = 250, y = 364)
+        missileLevelPos = (250, 364)
 
         targets.clear()
-        
-        targets.append(Target(850, 320, target_surface))
+        targets.append(Target(525, 200, target_surface))
+        targets.append(Target(775, 400, target_surface))
 
         showText = False
         levelDone = False
@@ -1328,8 +1327,8 @@ while running:
             levelDone = False
             showText = True
             missile.reset(missileLevelPos[0], missileLevelPos[1])
-            if 5 not in unlockedLevels:
-                unlockedLevels.append(5)
+            if 6 not in unlockedLevels:
+                unlockedLevels.append(6)
 
         infoText = smallerFont.render("LEVEL: [5]", True, (255, 1, 1))
         infoRect = infoText.get_rect(center = (575, 615))
@@ -1386,6 +1385,7 @@ while running:
         else:
             game_surface.blit(backButtonUnselected, (30, 474))
             syncBackButton = True
+
 
     #region gpu
     # ── GPU upload ────────────────────────────────────────────────────
