@@ -132,7 +132,7 @@ syncNextButton = True
 syncBackButton = True
 
 missileLevelPos = (0,0)
-unlockedLevels = [1,2,3,4,5,6,7]
+unlockedLevels = [1]
 
 explosion_active = False
 explosion_pos = (0, 0)
