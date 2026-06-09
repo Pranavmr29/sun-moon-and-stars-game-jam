@@ -132,7 +132,7 @@ syncNextButton = True
 syncBackButton = True
 
 missileLevelPos = (0,0)
-unlockedLevels = [1,2,3,4,5,6,7]
+unlockedLevels = [1]
 
 explosion_active = False
 explosion_pos = (0, 0)
@@ -193,10 +193,15 @@ class Body:
         for o in others:
             #calculate each body's effect individually, and add up as we go
             #use cx/cy to get gravity from the body's center
+            #find the distance from both bodies on the x and y axis
             dx = o.cx - self.cx
             dy = o.cy - self.cy
+            #use the pythagorean theroem to find the distance from the two bodies
+            #if the distance is less than the minimum defined, override the distance to the minimum
             dist = max(math.hypot(dx, dy), MIN_DIST)
+            #use the equation (G*m1*m2)/r^3 to find the acceleration of the object
             scale = G * o.mass * self.mass / dist ** 3
+            #add to the total forces
             total_fx += scale * dx
             total_fy += scale * dy
         return total_fx, total_fy
@@ -214,6 +219,7 @@ class Body:
     #surface {pygame.surface} the surface to draw the lines onto
     #color {tuple} optional line color
     def draw_trail(self, surface, color=(160, 2, 2)):
+        #anytime the trail has at least one point, start drawing
         if len(self.trail) > 1:
             pygame.draw.lines(surface, color, False, list(self.trail), 1)
 
@@ -226,12 +232,15 @@ class Body:
     #missile {Missile} the object of the missile
     #return {bool} whether the missile is touching the body or not
     def collided(self, missile):
+        #if the body is not a collider, the missile cannot collide with it
         if self.collider == False:
             return False
+        #find distance from the pythagorean theorem
         dx = missile.cx - self.cx
         dy = missile.cy - self.cy
         dist = math.hypot(dx, dy)
         if dist <= self.sprite_w:
+            #if the distance is less than the radius of the body, the missile has collided
             return True
         else:
             return False
@@ -252,6 +261,7 @@ class Missile(Body):
     #planets {list} a list of body objects that are not the missile
     #no return type, just uses return to stop the function early if the missile is not freely moving
     def update(self, planets: list[Body]):
+        #if the missile is not freely moving, then gravity cannot act on it
         if self.state != Missile.FREE:
             return
         fx, fy = self.gravity_from(planets)
@@ -414,6 +424,7 @@ def handle_missile_drag(event):
 
 #this function draws the button flashing when the mouse hovers over it
 def draw_hover_button(surface, mouse_pos, bounds, pos, unselected, selected_on, selected_off, sync_flag, timer):
+    #check if the mouse position is in bound of the button
     hovered = in_bounds(*mouse_pos, bounds)
     if hovered:
         if sync_flag:
@@ -564,15 +575,19 @@ mouse_current_pos = (0, 0)
 # the main loop is seperated into 3 pieces: inputs, which handle all user input; transitions, which are 1 time actions; and Levels, which are looping actions
 running = True
 while running:
+    #keep track of the time elapsed between loops for the explosion animation
     increment = clock.tick(60) / 1000
     timer += increment
     for event in pygame.event.get():
+        #handles if the user clicks the window X button
         if event.type == pygame.QUIT:
             running = False
         #region home inputs
         elif currState == GameStates.HOME:
             if event.type == pygame.MOUSEBUTTONDOWN:
+                #get the mouse position to use for checking button clicks
                 mx, my = event.pos
+                #event.type already checks for a click, use this to check whether the mouse was on the button at the time of the click
                 if (618 <= mx <= 870) and (519 <= my <= 583):
                     currState = GameStates.TRANSITION_TO_TUTORIAL
                 if (280 <= mx <= 532) and (519 <= my <= 583):
@@ -581,8 +596,6 @@ while running:
                     #wipe all user progress for next user
                     unlockedLevels = [1]
                     currState = GameStates.TRANSITION_TO_HOME
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE: print(pygame.mouse.get_pos())
 
         #region tutorial inputs
         elif currState == GameStates.TUTORIAL:
@@ -593,6 +606,7 @@ while running:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mx, my = event.pos
                 if in_bounds(mx, my, RESET_BTN):
+                    #when the reset button is pressed, reload level by going to the transition state, which then load the level again
                     currState = GameStates.TRANSITION_TO_TUTORIAL
                 elif in_bounds(mx, my, HOME_BTN):
                     currState = GameStates.TRANSITION_TO_HOME
@@ -606,6 +620,7 @@ while running:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mx, my = event.pos
                 if in_bounds(mx, my, RESET_BTN):
+                    #when the reset button is pressed, reload level by going to the transition state, which then load the level again
                     currState = GameStates.TRANSITION_TO_L1
                 elif in_bounds(mx, my, HOME_BTN):
                     currState = GameStates.TRANSITION_TO_HOME
@@ -622,6 +637,7 @@ while running:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mx, my = event.pos
                 if in_bounds(mx, my, RESET_BTN):
+                    #when the reset button is pressed, reload level by going to the transition state, which then load the level again
                     currState = GameStates.TRANSITION_TO_L2
                 elif in_bounds(mx, my, HOME_BTN):
                     currState = GameStates.TRANSITION_TO_HOME
@@ -640,6 +656,7 @@ while running:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mx, my = event.pos
                 if in_bounds(mx, my, RESET_BTN):
+                    #when the reset button is pressed, reload level by going to the transition state, which then load the level again
                     currState = GameStates.TRANSITION_TO_L3
                 elif in_bounds(mx, my, HOME_BTN):
                     currState = GameStates.TRANSITION_TO_HOME
@@ -658,6 +675,7 @@ while running:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mx, my = event.pos
                 if in_bounds(mx, my, RESET_BTN):
+                    #when the reset button is pressed, reload level by going to the transition state, which then load the level again
                     currState = GameStates.TRANSITION_TO_L4
                 elif in_bounds(mx, my, HOME_BTN):
                     currState = GameStates.TRANSITION_TO_HOME
@@ -678,6 +696,7 @@ while running:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mx, my = event.pos
                 if in_bounds(mx, my, RESET_BTN):
+                    #when the reset button is pressed, reload level by going to the transition state, which then load the level again
                     currState = GameStates.TRANSITION_TO_L5
                 elif in_bounds(mx, my, HOME_BTN):
                     currState = GameStates.TRANSITION_TO_HOME
@@ -697,6 +716,7 @@ while running:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mx, my = event.pos
                 if in_bounds(mx, my, RESET_BTN):
+                    #when the reset button is pressed, reload level by going to the transition state, which then load the level again
                     currState = GameStates.TRANSITION_TO_L6
                 elif in_bounds(mx, my, HOME_BTN):
                     currState = GameStates.TRANSITION_TO_HOME
@@ -721,6 +741,7 @@ while running:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mx, my = event.pos
                 if in_bounds(mx, my, RESET_BTN):
+                    #when the reset button is pressed, reload level by going to the transition state, which then load the level again
                     currState = GameStates.TRANSITION_TO_L7
                 elif in_bounds(mx, my, HOME_BTN):
                     currState = GameStates.TRANSITION_TO_HOME
@@ -735,6 +756,7 @@ while running:
         elif currState == GameStates.L8:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r: currState = GameStates.TRANSITION_TO_L8
+                #adds the keys for boosting and nudging for the user to use
                 if event.key == pygame.K_RIGHT: missile.vx += 5
                 if event.key == pygame.K_LEFT: missile.vx -= 5
                 if event.key == pygame.K_UP: missile.vy -= 5
@@ -744,6 +766,7 @@ while running:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mx, my = event.pos
                 if in_bounds(mx, my, RESET_BTN):
+                    #when the reset button is pressed, reload level by going to the transition state, which then load the level again
                     currState = GameStates.TRANSITION_TO_L8
                 elif in_bounds(mx, my, HOME_BTN):
                     currState = GameStates.TRANSITION_TO_HOME
@@ -770,11 +793,14 @@ while running:
         missile.draw_trail(game_surface)
         missile.draw(game_surface)
         
+        #only 1 body on the home screen, so only draw the bodies, dont need to apply gravity
         for body in bodies:
             body.draw(game_surface)
 
+        #get mouse position to use for triggering the blinking button animation
         mouseX, mouseY = pygame.mouse.get_pos()
 
+        #cannot use the hover button function for these buttons because there is no image to show, just the button box
         if in_bounds(mouseX, mouseY, WIPE_BTN):
             wipeButtonText = smallerHighlightedFont.render("NEW PLAYER", True, (255, 1, 1))
             if syncWipeButton:
@@ -811,10 +837,12 @@ while running:
             tutorialButtonText = smallerFont.render("TUTORIAL", True, (255, 1, 1))
             syncTutorialButton = True
         
+        #set up the button boxes
         playButtonRect = playButtonText.get_rect(center = (406, 551))
         tutorialButtonRect = tutorialButtonText.get_rect(center = (744, 551))
         wipeButtonRect = wipeButtonText.get_rect(center = (574, 481))
 
+        #blit all the text for the titles and each button
         game_surface.blit(playButtonText, playButtonRect)
         game_surface.blit(tutorialButtonText, tutorialButtonRect)
         game_surface.blit(wipeButtonText, wipeButtonRect)
@@ -823,14 +851,15 @@ while running:
 
     #region t_tutorial
     elif currState == GameStates.TRANSITION_TO_TUTORIAL:
+        #clear all bodies and reset the missile positon
         bodies.clear()
         missile.reset(x = 250, y = 364)
         missileLevelPos = (250, 364)
-        bodies = []
         bodies.append(Body(20000, 575, 340, 0, 0, 10, surface = pygame.transform.scale(
             pygame.image.load("images/redscale planet 1.png").convert_alpha(), (84, 84)
         ),
         anchor = True, collider = True))
+        #clear all targets and create the one needed for this level
         targets.clear()
         targets.append(Target(719, 364, target_surface))
 
@@ -842,6 +871,7 @@ while running:
 
     #region tutorial
     elif currState == GameStates.TUTORIAL:
+        #draw the background, including stars
         draw_level_background()
         draw_missile()
 
