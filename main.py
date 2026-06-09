@@ -114,6 +114,7 @@ showText = True
 currState = GameStates.TRANSITION_TO_HOME
 timer = 0
 reset = False
+levelDone = False
 
 syncPlayButton = True
 syncTutorialButton = True
@@ -123,7 +124,7 @@ syncNextButton = True
 syncBackButton = True
 
 missileLevelPos = (0,0)
-unlockedLevels = [1]
+unlockedLevels = [1, 2, 3]
 
 explosion_active = False
 explosion_pos = (0, 0)
@@ -375,35 +376,11 @@ l1DoneRect = l1DoneText.get_rect(center = (575, 80))
 
 #----------------------------------- SCENE -----------------------------------#
 #region scene
-bodies: list[Body] = [
-    #Planet(
-    #    mass = 20000, x = 583, y = 308, vx = 0, vy = 0, radius = 10,
-    #    surface = pygame.transform.scale(
-    #        pygame.image.load("images/redscale planet 1.png").convert_alpha(), (84, 84)
-    #    ),
-    #    #this planet stays fixed
-    #    anchor = True,
-    #),
-    #Planet(
-    #    mass = 6000, x = 583, y = 133, vx = 5, vy = 0, radius = 5,
-    #    surface = pygame.transform.scale(
-    #        pygame.image.load("images/redscale moon.png").convert_alpha(), (42, 42)
-    #    ),
-    #)
-]
+bodies: list[Body] = []
  
 missile = Missile(x = 557, y = 50, image = missile_image)
  
 targets: list[Target] = []
- 
- 
-def reset_field(tx = 0, ty = 0):
-    tx = 0 if tx == 0 else tx
-    ty = 0 if ty == 0 else ty
-    for t in targets:
-        t.reset(x = tx, y = ty)
-    missile.reset(x = missileLevelPos[0], y = missileLevelPos[1])
-
 
 is_dragging = False
 mouse_start_pos = (0, 0)
@@ -430,7 +407,7 @@ while running:
         #region tutorial inputs
         elif currState == GameStates.TUTORIAL:
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_r: reset = True
+                if event.key == pygame.K_r: currState = GameStates.TRANSITION_TO_TUTORIAL
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mx, my = event.pos
                 if in_bounds(mx, my, RESET_BTN):
@@ -451,7 +428,7 @@ while running:
         #region L1 inputs
         elif currState == GameStates.L1:
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_r: reset = True
+                if event.key == pygame.K_r: currState = GameStates.TRANSITION_TO_L1
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mx, my = event.pos
                 if in_bounds(mx, my, RESET_BTN):
@@ -467,13 +444,14 @@ while running:
             elif event.type == pygame.MOUSEMOTION and is_dragging:
                 mouse_current_pos = event.pos
             elif event.type == pygame.MOUSEBUTTONUP and is_dragging:
+                showText = False
                 is_dragging = False
                 missile.launch(mouse_start_pos, mouse_current_pos)
 
         #region L2 inputs
         elif currState == GameStates.L2:
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_r: reset = True
+                if event.key == pygame.K_r: currState = GameStates.TRANSITION_TO_L2
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mx, my = event.pos
                 if in_bounds(mx, my, RESET_BTN):
@@ -491,13 +469,14 @@ while running:
             elif event.type == pygame.MOUSEMOTION and is_dragging:
                 mouse_current_pos = event.pos
             elif event.type == pygame.MOUSEBUTTONUP and is_dragging:
+                showText = False
                 is_dragging = False
                 missile.launch(mouse_start_pos, mouse_current_pos)
 
         #region L3 inputs
         elif currState == GameStates.L3:
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_r: reset = True
+                if event.key == pygame.K_r: currState = GameStates.TRANSITION_TO_L3
                 if event.key == pygame.K_RIGHT: missile.vx += 5
                 if event.key == pygame.K_LEFT: missile.vx -= 5
                 if event.key == pygame.K_UP: missile.vy -= 5
@@ -519,6 +498,36 @@ while running:
             elif event.type == pygame.MOUSEMOTION and is_dragging:
                 mouse_current_pos = event.pos
             elif event.type == pygame.MOUSEBUTTONUP and is_dragging:
+                showText = False
+                is_dragging = False
+                missile.launch(mouse_start_pos, mouse_current_pos)
+    
+        #region L4 inputs
+        elif currState == GameStates.L4:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r: currState = GameStates.TRANSITION_TO_L4
+                if event.key == pygame.K_RIGHT: missile.vx += 5
+                if event.key == pygame.K_LEFT: missile.vx -= 5
+                if event.key == pygame.K_UP: missile.vy -= 5
+                if event.key == pygame.K_DOWN: missile.vy += 5
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mx, my = event.pos
+                if in_bounds(mx, my, RESET_BTN):
+                    currState = GameStates.TRANSITION_TO_L4
+                elif in_bounds(mx, my, HOME_BTN):
+                    currState = GameStates.TRANSITION_TO_HOME
+                elif in_bounds(mx, my, BACK_BTN):
+                    currState = GameStates.TRANSITION_TO_L3
+                elif in_bounds(mx, my, NEXT_BTN):
+                    currState = GameStates.TRANSITION_TO_L5
+                elif missile.state == Missile.LAUNCH:
+                    if math.hypot(mx - missile.x, my - missile.y) < 40:
+                        is_dragging = True
+                        mouse_start_pos = mouse_current_pos = event.pos
+            elif event.type == pygame.MOUSEMOTION and is_dragging:
+                mouse_current_pos = event.pos
+            elif event.type == pygame.MOUSEBUTTONUP and is_dragging:
+                showText = False
                 is_dragging = False
                 missile.launch(mouse_start_pos, mouse_current_pos)
 
@@ -584,7 +593,6 @@ while running:
 
     #region t_tutorial
     elif currState == GameStates.TRANSITION_TO_TUTORIAL:
-        numTargets = 3
         bodies.clear()
         missile.reset(x = 250, y = 364)
         missileLevelPos = (250, 364)
@@ -595,6 +603,9 @@ while running:
         anchor = True, collider = True))
         targets.clear()
         targets.append(Target(719, 364, target_surface))
+
+        showText = True
+        levelDone = False
         currState = GameStates.TUTORIAL
 
     #region tutorial
@@ -616,7 +627,7 @@ while running:
 
         for t in targets:
             t.draw(game_surface)
-            if t.state == Target.UNHIT and t.check_hit(missile)  and not explosion_active:
+            if t.state == Target.UNHIT and t.check_hit(missile) and not explosion_active:
                 t.state = Target.HIT
                 explosion_active = True
                 explosion_pos = (int(missile.x + 16), int(missile.y))
@@ -624,17 +635,11 @@ while running:
                 missile.reset(x = missileLevelPos[0], y = missileLevelPos[1])
         
         if all(t.state == Target.HIT for t in targets):
-            numTargets -= 1
-            reset = True
+            levelDone = True
 
-        if reset:
-            reset = False
-            if numTargets == 3:
-                reset_field(719, 364)
-            elif numTargets == 2:
-                reset_field(659, 209)
-            elif numTargets == 1:
-                reset_field(959, 334)
+        if levelDone:
+            levelDone = False
+            missile.reset(missileLevelPos[0], missileLevelPos[1])
         
         for body in bodies:
             body.draw(game_surface)
@@ -700,9 +705,9 @@ while running:
 
         targets.clear()
         targets.append(Target(719, 339, target_surface))
-        numTargets = 1
 
         showText = False
+        levelDone = False
         currState = GameStates.L1
 
     #region L1
@@ -752,17 +757,14 @@ while running:
                 explosion_active = False
 
         if all(t.state == Target.HIT for t in targets):
-            numTargets -= 1
-            reset = True
+            levelDone = True
 
-        if reset:
-            reset = False
-            if numTargets == 1:
-                reset_field(719, 339)
-            elif numTargets == 0:
-                showText = True
-                if 2 not in unlockedLevels:
-                    unlockedLevels.append(2)
+        if levelDone:
+            levelDone = False
+            showText = True
+            missile.reset(missileLevelPos[0], missileLevelPos[1])
+            if 2 not in unlockedLevels:
+                unlockedLevels.append(2)
 
         infoText = smallerFont.render("LEVEL: [" + str(1) + "] | LAUNCHES LEFT: [" + str(1) + "]", True, (255, 1, 1))
         infoRect = infoText.get_rect(center = (575, 615))
@@ -823,8 +825,9 @@ while running:
 
         targets.clear()
         targets.append(Target(759, 373, target_surface))
-        numTargets = 1
+        
         showText = False
+        levelDone = False
         currState = GameStates.L2
 
     #region L2
@@ -874,17 +877,14 @@ while running:
                 explosion_active = False
 
         if all(t.state == Target.HIT for t in targets):
-            numTargets -= 1
-            reset = True
+            levelDone = True
 
-        if reset:
-            reset = False
-            if numTargets == 1:
-                reset_field(759, 373)
-            elif numTargets == 0:
-                showText = True
-                if 3 not in unlockedLevels:
-                    unlockedLevels.append(3)
+        if levelDone:
+            levelDone = False
+            showText = True
+            missile.reset(missileLevelPos[0], missileLevelPos[1])
+            if 3 not in unlockedLevels:
+                unlockedLevels.append(3)
 
         infoText = smallerFont.render("LEVEL: [" + str(1) + "] | LAUNCHES LEFT: [" + str(1) + "]", True, (255, 1, 1))
         infoRect = infoText.get_rect(center = (575, 615))
@@ -953,8 +953,8 @@ while running:
         targets.clear()
         targets.append(Target(775, 450, target_surface))
         targets.append(Target(775, 150, target_surface))
-        numTargets = 2
         showText = False
+        levelDone = False
         currState = GameStates.L3
 
     #region L3
@@ -1003,18 +1003,14 @@ while running:
                 explosion_active = False
 
         if all(t.state == Target.HIT for t in targets):
-            numTargets -= 2
-            reset = True
+            levelDone = True
 
-        if reset:
-            reset = False
-            if numTargets == 0:
-                showText = True
-                if 4 not in unlockedLevels:
-                    unlockedLevels.append(4)
-            elif numTargets != 0:
-                currState = GameStates.TRANSITION_TO_L3
-
+        if levelDone:
+            levelDone = False
+            showText = True
+            missile.reset(missileLevelPos[0], missileLevelPos[1])
+            if 4 not in unlockedLevels:
+                unlockedLevels.append(4)
 
         infoText = smallerFont.render("LEVEL: [" + str(1) + "] | LAUNCHES LEFT: [" + str(1) + "]", True, (255, 1, 1))
         infoRect = infoText.get_rect(center = (575, 615))
@@ -1048,6 +1044,133 @@ while running:
             syncHomeButton = True
 
         if 4 in unlockedLevels:
+            if in_bounds(mouseX, mouseY, NEXT_BTN):
+                if syncNextButton:
+                    timer = 0
+                    syncNextButton = False
+                if timer % 1 < 0.5:
+                    game_surface.blit(nextButtonSelectedOn, (1057, 474))
+                else:
+                    game_surface.blit(nextButtonSelectedOff, (1057, 474))
+            else:
+                game_surface.blit(nextButtonUnselected, (1057, 474))
+                syncNextButton = True
+        
+        if in_bounds(mouseX, mouseY, BACK_BTN):
+            if syncBackButton:
+                timer = 0
+                syncBackButton = False
+            if timer % 1 < 0.5:
+                game_surface.blit(backButtonSelectedOn, (30, 474))
+            else:
+                game_surface.blit(backButtonSelectedOff, (30, 474))
+        else:
+            game_surface.blit(backButtonUnselected, (30, 474))
+            syncBackButton = True
+
+    #region t_L4
+    elif currState == GameStates.TRANSITION_TO_L4:
+        bodies.clear()
+        bodies.append(Body(20000, 400, 150, 0, 0, 10, pygame.transform.scale(pygame.image.load("images/redscale star.png").convert_alpha(), (168, 168)), anchor=True))
+        bodies.append(Body(20000, 750, 450, 0, 0, 10, pygame.transform.scale(pygame.image.load("images/redscale star.png").convert_alpha(), (168, 168)), anchor=True))
+        missile.reset(x = 250, y = 364)
+        missileLevelPos = (250, 364)
+
+        targets.clear()
+        targets.append(Target(775, 364, target_surface))
+        #targets.append(Target(775, 150, target_surface))
+
+        showText = False
+        levelDone = False
+        currState = GameStates.L4
+
+    #region L4
+    elif currState == GameStates.L4:
+        mouseX, mouseY = pygame.mouse.get_pos()
+        game_surface.fill((35, 35, 55))
+        for star_type, position in background_stars:
+            game_surface.blit(star_images[star_type], position)
+
+        missile.update(bodies)
+        if missile.state == Missile.LAUNCH and is_dragging:
+            ddx = mouse_start_pos[0] - mouse_current_pos[0]
+            ddy = mouse_start_pos[1] - mouse_current_pos[1]
+            missile.draw_aimed(game_surface, ddx, ddy)
+        else:
+            missile.draw(game_surface)
+
+        missile.record_trail(18, 24)
+        missile.draw_trail(game_surface)
+        if is_dragging:
+            draw_launch_line(game_surface, missile, bodies, mouse_start_pos, mouse_current_pos)
+
+        for body in bodies:
+            others = [b for b in bodies if b is not body]
+            body.update(others)
+            body.draw(game_surface)
+            if body.collided(missile):
+                explosion_active = True
+                explosion_pos = (int(missile.x + 16), int(missile.y))
+                explosion_timer = EXPLOSION_DURATION
+                missile.reset(x = missileLevelPos[0], y = missileLevelPos[1])
+                explosion_timer -= increment
+
+        for t in targets:
+            t.draw(game_surface)
+            if t.state == Target.UNHIT and t.check_hit(missile)  and not explosion_active:
+                t.state = Target.HIT
+                explosion_active = True
+                explosion_pos = (int(missile.x), int(missile.y))
+                explosion_timer = EXPLOSION_DURATION
+
+        if explosion_active:
+            game_surface.blit(explosion_image, explosion_pos)
+            explosion_timer -= increment
+            if explosion_timer <= 0:
+                explosion_active = False
+
+        if all(t.state == Target.HIT for t in targets):
+            levelDone = True
+
+        if levelDone:
+            levelDone = False
+            showText = True
+            missile.reset(missileLevelPos[0], missileLevelPos[1])
+            if 5 not in unlockedLevels:
+                unlockedLevels.append(5)
+
+        infoText = smallerFont.render("LEVEL: [" + str(1) + "] | LAUNCHES LEFT: [" + str(1) + "]", True, (255, 1, 1))
+        infoRect = infoText.get_rect(center = (575, 615))
+        game_surface.blit(infoText, infoRect)
+    
+        if showText:
+            game_surface.blit(l1DoneText, l1DoneRect)
+
+        if in_bounds(mouseX, mouseY, RESET_BTN):
+            if syncResetButton:
+                timer = 0
+                syncResetButton = False
+            if timer % 1 < 0.5:
+                game_surface.blit(resetButtonSelectedOn, (30, 557))
+            else:
+                game_surface.blit(resetButtonSelectedOff, (30, 557))
+        else:
+            game_surface.blit(resetButtonUnselected, (30, 557))
+            syncResetButton = True
+        
+        if in_bounds(mouseX, mouseY, HOME_BTN):
+            if syncHomeButton:
+                timer = 0
+                syncHomeButton = False
+            if timer % 1 < 0.5:
+                game_surface.blit(homeButtonSelectedOn, (1057, 557))
+            else:
+                game_surface.blit(homeButtonSelectedOff, (1057, 557))
+        else:
+            game_surface.blit(homeButtonUnselected, (1057, 557))
+            syncHomeButton = True
+
+        if 5 in unlockedLevels:
             if in_bounds(mouseX, mouseY, NEXT_BTN):
                 if syncNextButton:
                     timer = 0
