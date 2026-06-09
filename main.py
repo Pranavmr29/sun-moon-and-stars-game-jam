@@ -143,7 +143,8 @@ explosion_timer = 0
 #base class for all physics based objects
 #region Body
 class Body:
-    #every body has these qualities
+    #every body has these qualitiesj9'
+     
     #anchor determines whether an object is influenced by gravity or static and doesn't move
     #collider determines whether the missile will explode on impact with the body
     def __init__(self, mass, x, y, vx, vy, radius, surface, anchor = False, collider = False):
@@ -875,6 +876,7 @@ while running:
         draw_level_background()
         draw_missile()
 
+        #draws all the targets and checks if they are hit
         for t in targets:
             t.draw(game_surface)
             if t.state == Target.UNHIT and t.check_hit(missile) and not explosion_active:
@@ -884,16 +886,20 @@ while running:
                 explosion_timer = EXPLOSION_DURATION
                 missile.reset(x = missileLevelPos[0], y = missileLevelPos[1])
         
+        #when all targets are hit, the level is done
         if all(t.state == Target.HIT for t in targets):
             levelDone = True
 
+        #if the level is done, reset the missile and wait
         if levelDone:
             levelDone = False
             missile.reset(missileLevelPos[0], missileLevelPos[1])
         
+        #draw each body and check for missile collision against the colliders
         for body in bodies:
             body.draw(game_surface)
             if body.collided(missile):
+                #if the missile collided, activate the explosion
                 explosion_active = True
                 missileCollided = True
                 explosion_pos = (int(missile.x + 16), int(missile.y))
@@ -908,6 +914,7 @@ while running:
             game_surface.blit(tutorialText3, tutorialRect3)
             game_surface.blit(tutorialText4, tutorialRect4)
 
+        #get mouse position for button checking
         mouseX, mouseY = pygame.mouse.get_pos()
 
         syncResetButton, timer = draw_hover_button(game_surface, (mouseX, mouseY), RESET_BTN, (30,557), resetButtonUnselected, resetButtonSelectedOn, resetButtonSelectedOff, syncResetButton, timer)
@@ -937,17 +944,20 @@ while running:
         draw_level_background()
         draw_missile()
 
+        #draw each body and check for missile collision against the colliders
         for body in bodies:
             others = [b for b in bodies if b is not body]
             body.update(others)
             body.draw(game_surface)
             if body.collided(missile):
+                #if the missile collided, activate the explosion
                 explosion_active = True
                 missileCollided = True
                 explosion_pos = (int(missile.x + 16), int(missile.y))
                 explosion_timer = EXPLOSION_DURATION
                 explosion_timer -= increment
 
+        #draws all the targets and checks if they are hit
         for t in targets:
             t.draw(game_surface)
             if t.state == Target.UNHIT and t.check_hit(missile)  and not explosion_active:
@@ -958,10 +968,12 @@ while running:
                 missile.reset(x = missileLevelPos[0], y = missileLevelPos[1])
 
         update_explosion(GameStates.TRANSITION_TO_L1)
-
+        
+        #when all targets are hit, the level is done
         if all(t.state == Target.HIT for t in targets):
             levelDone = True
 
+        #if the level is done, reset the missile and wait
         if levelDone:
             levelDone = False
             showEndText = True
@@ -976,6 +988,7 @@ while running:
         if showEndText:
             game_surface.blit(l1DoneText, l1DoneRect)
 
+        #get mouse position for button checking
         mouseX, mouseY = pygame.mouse.get_pos()
         syncResetButton, timer = draw_hover_button(game_surface, (mouseX, mouseY), RESET_BTN, (30,557), resetButtonUnselected, resetButtonSelectedOn, resetButtonSelectedOff, syncResetButton, timer)
         syncHomeButton, timer = draw_hover_button(game_surface, (mouseX, mouseY), HOME_BTN, (1057,557), homeButtonUnselected, homeButtonSelectedOn, homeButtonSelectedOff, syncHomeButton, timer)
@@ -1019,17 +1032,20 @@ while running:
         draw_level_background()
         draw_missile()
 
+        #draw each body and check for missile collision against the colliders
         for body in bodies:
             others = [b for b in bodies if b is not body]
             body.update(others)
             body.draw(game_surface)
             if body.collided(missile):
+                #if the missile collided, activate the explosion
                 explosion_active = True
                 missileCollided = True
                 explosion_pos = (int(missile.x + 16), int(missile.y))
                 explosion_timer = EXPLOSION_DURATION
                 explosion_timer -= increment
 
+        #draws all the targets and checks if they are hit
         for t in targets:
             t.draw(game_surface)
             if t.state == Target.UNHIT and t.check_hit(missile)  and not explosion_active:
@@ -1041,9 +1057,11 @@ while running:
 
         update_explosion(GameStates.TRANSITION_TO_L2)
 
+        #when all targets are hit, the level is done
         if all(t.state == Target.HIT for t in targets):
             levelDone = True
 
+        #if the level is done, reset the missile and wait
         if levelDone:
             levelDone = False
             showEndText = True
@@ -1058,6 +1076,7 @@ while running:
         if showEndText:
             game_surface.blit(l1DoneText, l1DoneRect)
 
+        #get mouse position for button checking
         mouseX, mouseY = pygame.mouse.get_pos()
         syncResetButton, timer = draw_hover_button(game_surface, (mouseX, mouseY), RESET_BTN, (30,557), resetButtonUnselected, resetButtonSelectedOn, resetButtonSelectedOff, syncResetButton, timer)
         syncHomeButton, timer = draw_hover_button(game_surface, (mouseX, mouseY), HOME_BTN, (1057,557), homeButtonUnselected, homeButtonSelectedOn, homeButtonSelectedOff, syncHomeButton, timer)
@@ -1096,17 +1115,20 @@ while running:
         draw_level_background()
         draw_missile()
 
+        #draw each body and check for missile collision against the colliders
         for body in bodies:
             others = [b for b in bodies if b is not body]
             body.update(others)
             body.draw(game_surface)
             if body.collided(missile):
+                #if the missile collided, activate the explosion
                 explosion_active = True
                 missileCollided = True
                 explosion_pos = (int(missile.x + 16), int(missile.y))
                 explosion_timer = EXPLOSION_DURATION
                 explosion_timer -= increment
 
+        #draws all the targets and checks if they are hit
         for t in targets:
             t.draw(game_surface)
             if t.state == Target.UNHIT and t.check_hit(missile)  and not explosion_active:
@@ -1117,10 +1139,11 @@ while running:
 
         update_explosion(GameStates.TRANSITION_TO_L3)
             
-
+        #when all targets are hit, the level is done
         if all(t.state == Target.HIT for t in targets):
             levelDone = True
 
+        #if the level is done, reset the missile and wait
         if levelDone:
             levelDone = False
             showEndText = True
@@ -1135,6 +1158,7 @@ while running:
         if showEndText:
             game_surface.blit(l1DoneText, l1DoneRect)
 
+        #get mouse position for button checking
         mouseX, mouseY = pygame.mouse.get_pos()
         syncResetButton, timer = draw_hover_button(game_surface, (mouseX, mouseY), RESET_BTN, (30,557), resetButtonUnselected, resetButtonSelectedOn, resetButtonSelectedOff, syncResetButton, timer)
         syncHomeButton, timer = draw_hover_button(game_surface, (mouseX, mouseY), HOME_BTN, (1057,557), homeButtonUnselected, homeButtonSelectedOn, homeButtonSelectedOff, syncHomeButton, timer)
@@ -1188,17 +1212,20 @@ while running:
         draw_level_background()
         draw_missile()
 
+        #draw each body and check for missile collision against the colliders
         for body in bodies:
             others = [b for b in bodies if b is not body]
             body.update(others)
             body.draw(game_surface)
             if body.collided(missile):
+                #if the missile collided, activate the explosion
                 explosion_active = True
                 explosion_pos = (int(missile.x + 16), int(missile.y))
                 explosion_timer = EXPLOSION_DURATION
                 explosion_timer -= increment
                 missileCollided = True
 
+        #draws all the targets and checks if they are hit
         for t in targets:
             t.draw(game_surface)
             if t.state == Target.UNHIT and t.check_hit(missile)  and not explosion_active:
@@ -1209,9 +1236,11 @@ while running:
 
         update_explosion(GameStates.TRANSITION_TO_L4)
 
+        #when all targets are hit, the level is done
         if all(t.state == Target.HIT for t in targets):
             levelDone = True
 
+        #if the level is done, reset the missile and wait
         if levelDone:
             levelDone = False
             showEndText = True
@@ -1226,6 +1255,7 @@ while running:
         if showEndText:
             game_surface.blit(l1DoneText, l1DoneRect)
 
+        #get mouse position for button checking
         mouseX, mouseY = pygame.mouse.get_pos()
         syncResetButton, timer = draw_hover_button(game_surface, (mouseX, mouseY), RESET_BTN, (30,557), resetButtonUnselected, resetButtonSelectedOn, resetButtonSelectedOff, syncResetButton, timer)
         syncHomeButton, timer = draw_hover_button(game_surface, (mouseX, mouseY), HOME_BTN, (1057,557), homeButtonUnselected, homeButtonSelectedOn, homeButtonSelectedOff, syncHomeButton, timer)
@@ -1265,17 +1295,20 @@ while running:
         draw_level_background()
         draw_missile()
 
+        #draw each body and check for missile collision against the colliders
         for body in bodies:
             others = [b for b in bodies if b is not body]
             body.update(others)
             body.draw(game_surface)
             if body.collided(missile):
+                #if the missile collided, activate the explosion
                 explosion_active = True
                 explosion_pos = (int(missile.x + 16), int(missile.y))
                 explosion_timer = EXPLOSION_DURATION
                 explosion_timer -= increment
                 missileCollided = True
-
+        
+        #draws all the targets and checks if they are hit
         for t in targets:
             t.draw(game_surface)
             if t.state == Target.UNHIT and t.check_hit(missile)  and not explosion_active:
@@ -1290,9 +1323,11 @@ while running:
             game_surface.blit(boostText, boostRect)
             game_surface.blit(boostText2, boostRect2)
 
+        #when all targets are hit, the level is done
         if all(t.state == Target.HIT for t in targets):
             levelDone = True
 
+        #if the level is done, reset the missile and wait
         if levelDone:
             levelDone = False
             showEndText = True
@@ -1307,6 +1342,7 @@ while running:
         if showEndText:
             game_surface.blit(l1DoneText, l1DoneRect)
 
+        #get mouse position for button checking
         mouseX, mouseY = pygame.mouse.get_pos()
         syncResetButton, timer = draw_hover_button(game_surface, (mouseX, mouseY), RESET_BTN, (30,557), resetButtonUnselected, resetButtonSelectedOn, resetButtonSelectedOff, syncResetButton, timer)
         syncHomeButton, timer = draw_hover_button(game_surface, (mouseX, mouseY), HOME_BTN, (1057,557), homeButtonUnselected, homeButtonSelectedOn, homeButtonSelectedOff, syncHomeButton, timer)
@@ -1345,17 +1381,20 @@ while running:
         draw_level_background()
         draw_missile()
 
+        #draw each body and check for missile collision against the colliders
         for body in bodies:
             others = [b for b in bodies if b is not body]
             body.update(others)
             body.draw(game_surface)
             if body.collided(missile):
+                #if the missile collided, activate the explosion
                 explosion_active = True
                 explosion_pos = (int(missile.x + 16), int(missile.y))
                 explosion_timer = EXPLOSION_DURATION
                 explosion_timer -= increment
                 missileCollided = True
 
+        #draws all the targets and checks if they are hit
         for t in targets:
             t.draw(game_surface)
             if t.state == Target.UNHIT and t.check_hit(missile)  and not explosion_active:
@@ -1369,9 +1408,11 @@ while running:
         if showStartText:
             game_surface.blit(boostText3, boostRect3)
 
+        #when all targets are hit, the level is done
         if all(t.state == Target.HIT for t in targets):
             levelDone = True
 
+        #if the level is done, reset the missile and wait
         if levelDone:
             levelDone = False
             showEndText = True
@@ -1386,6 +1427,7 @@ while running:
         if showEndText:
             game_surface.blit(l1DoneText, l1DoneRect)
 
+        #get mouse position for button checking
         mouseX, mouseY = pygame.mouse.get_pos()
         syncResetButton, timer = draw_hover_button(game_surface, (mouseX, mouseY), RESET_BTN, (30,557), resetButtonUnselected, resetButtonSelectedOn, resetButtonSelectedOff, syncResetButton, timer)
         syncHomeButton, timer = draw_hover_button(game_surface, (mouseX, mouseY), HOME_BTN, (1057,557), homeButtonUnselected, homeButtonSelectedOn, homeButtonSelectedOff, syncHomeButton, timer)
@@ -1444,17 +1486,20 @@ while running:
         missile.update(bodies)
         draw_missile()
 
+        #draw each body and check for missile collision against the colliders
         for body in bodies:
             others = [b for b in bodies if b is not body]
             body.update(others)
             body.draw(game_surface)
             if body.collided(missile):
+                #if the missile collided, activate the explosion
                 explosion_active = True
                 explosion_pos = (int(missile.x + 16), int(missile.y))
                 explosion_timer = EXPLOSION_DURATION
                 explosion_timer -= increment
                 missileCollided = True
 
+        #draws all the targets and checks if they are hit
         for t in targets:
             t.draw(game_surface)
             if t.state == Target.UNHIT and t.check_hit(missile)  and not explosion_active:
@@ -1469,9 +1514,11 @@ while running:
             game_surface.blit(nudgeText, nudgeRect)
             game_surface.blit(nudgeText2, nudgeRect2)
 
+        #when all targets are hit, the level is done
         if all(t.state == Target.HIT for t in targets):
             levelDone = True
 
+        #if the level is done, reset the missile and wait
         if levelDone:
             levelDone = False
             showEndText = True
@@ -1486,6 +1533,7 @@ while running:
         if showEndText:
             game_surface.blit(l1DoneText, l1DoneRect)
 
+        #get mouse position for button checking
         mouseX, mouseY = pygame.mouse.get_pos()
         syncResetButton, timer = draw_hover_button(game_surface, (mouseX, mouseY), RESET_BTN, (30,557), resetButtonUnselected, resetButtonSelectedOn, resetButtonSelectedOff, syncResetButton, timer)
         syncHomeButton, timer = draw_hover_button(game_surface, (mouseX, mouseY), HOME_BTN, (1057,557), homeButtonUnselected, homeButtonSelectedOn, homeButtonSelectedOff, syncHomeButton, timer)
@@ -1534,17 +1582,20 @@ while running:
         draw_level_background()
         draw_missile()
 
+        #draw each body and check for missile collision against the colliders
         for body in bodies:
             others = [b for b in bodies if b is not body]
             body.update(others)
             body.draw(game_surface)
             if body.collided(missile):
+                #if the missile collided, activate the explosion
                 explosion_active = True
                 explosion_pos = (int(missile.x + 16), int(missile.y))
                 explosion_timer = EXPLOSION_DURATION
                 explosion_timer -= increment
                 missileCollided = True
 
+        #draws all the targets and checks if they are hit
         for t in targets:
             t.draw(game_surface)
             if t.state == Target.UNHIT and t.check_hit(missile)  and not explosion_active:
@@ -1558,9 +1609,11 @@ while running:
         if showStartText:
             game_surface.blit(l8Text, l8Rect)
 
+        #when all targets are hit, the level is done
         if all(t.state == Target.HIT for t in targets):
             levelDone = True
 
+        #if the level is done, reset the missile and wait
         if levelDone:
             levelDone = False
             showEndText = True
@@ -1573,6 +1626,7 @@ while running:
         if showEndText:
             game_surface.blit(l1DoneText, l1DoneRect)
 
+        #get mouse position for button checking
         mouseX, mouseY = pygame.mouse.get_pos()
         syncResetButton, timer = draw_hover_button(game_surface, (mouseX, mouseY), RESET_BTN, (30,557), resetButtonUnselected, resetButtonSelectedOn, resetButtonSelectedOff, syncResetButton, timer)
         syncHomeButton, timer = draw_hover_button(game_surface, (mouseX, mouseY), HOME_BTN, (1057,557), homeButtonUnselected, homeButtonSelectedOn, homeButtonSelectedOff, syncHomeButton, timer)
