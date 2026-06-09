@@ -9,7 +9,7 @@ import moderngl
 import numpy as np
 from enum import Enum
 
-#This section code was created using Claude for the CRT visual effects. Sections created using Claude are within the hyphen lines
+#This section code was created using Claude for the CRT visual effects. Sections created using Claude are under these lines: ─────────
 #region CRT
 #------------------------------------------------------------------------------------------
 #Sets the window and game resolution, initializes Pygame and creates an OpenGL window mode
@@ -132,7 +132,7 @@ syncNextButton = True
 syncBackButton = True
 
 missileLevelPos = (0,0)
-unlockedLevels = [1,2,3,4,5,6,7,8]
+unlockedLevels = [1]
 
 explosion_active = False
 explosion_pos = (0, 0)
@@ -561,7 +561,6 @@ mouse_start_pos = (0, 0)
 mouse_current_pos = (0, 0)
 
 #region Main Loop
-# ── Loop ─────────────────────────────────────────────────────────────────────
 # the main loop is seperated into 3 pieces: inputs, which handle all user input; transitions, which are 1 time actions; and Levels, which are looping actions
 running = True
 while running:
@@ -611,8 +610,7 @@ while running:
                 elif in_bounds(mx, my, HOME_BTN):
                     currState = GameStates.TRANSITION_TO_HOME
                 elif in_bounds(mx, my, NEXT_BTN):
-                    if 2 in unlockedLevels:
-                        currState = GameStates.TRANSITION_TO_L2
+                    currState = GameStates.TRANSITION_TO_L2
 
         #region L2 inputs
         elif currState == GameStates.L2:
@@ -629,8 +627,7 @@ while running:
                 elif in_bounds(mx, my, BACK_BTN):
                     currState = GameStates.TRANSITION_TO_L1
                 elif in_bounds(mx, my, NEXT_BTN):
-                    if 3 in unlockedLevels:
-                        currState = GameStates.TRANSITION_TO_L3
+                    currState = GameStates.TRANSITION_TO_L3
 
         #region L3 inputs
         elif currState == GameStates.L3:
@@ -647,8 +644,7 @@ while running:
                 elif in_bounds(mx, my, BACK_BTN):
                     currState = GameStates.TRANSITION_TO_L2
                 elif in_bounds(mx, my, NEXT_BTN):
-                    if 4 in unlockedLevels:
-                        currState = GameStates.TRANSITION_TO_L4
+                    currState = GameStates.TRANSITION_TO_L4
     
         #region L4 inputs
         elif currState == GameStates.L4:
@@ -665,8 +661,7 @@ while running:
                 elif in_bounds(mx, my, BACK_BTN):
                     currState = GameStates.TRANSITION_TO_L3
                 elif in_bounds(mx, my, NEXT_BTN):
-                    if 5 in unlockedLevels:
-                        currState = GameStates.TRANSITION_TO_L5
+                    currState = GameStates.TRANSITION_TO_L5
 
         #region L5 inputs
         elif currState == GameStates.L5:
@@ -685,8 +680,7 @@ while running:
                 elif in_bounds(mx, my, BACK_BTN):
                     currState = GameStates.TRANSITION_TO_L4
                 elif in_bounds(mx, my, NEXT_BTN):
-                    if 6 in unlockedLevels:
-                        currState = GameStates.TRANSITION_TO_L6
+                    currState = GameStates.TRANSITION_TO_L6
 
         #region L6 inputs
         elif currState == GameStates.L6:
@@ -704,8 +698,7 @@ while running:
                 elif in_bounds(mx, my, BACK_BTN):
                     currState = GameStates.TRANSITION_TO_L5
                 elif in_bounds(mx, my, NEXT_BTN):
-                    if 7 in unlockedLevels:
-                        currState = GameStates.TRANSITION_TO_L7
+                    currState = GameStates.TRANSITION_TO_L7
 
         #region L7 inputs
         elif currState == GameStates.L7:
@@ -728,8 +721,7 @@ while running:
                 elif in_bounds(mx, my, BACK_BTN):
                     currState = GameStates.TRANSITION_TO_L6
                 elif in_bounds(mx, my, NEXT_BTN):
-                    if 8 in unlockedLevels:
-                        currState = GameStates.TRANSITION_TO_L8
+                    currState = GameStates.TRANSITION_TO_L8
 
 
         #region L8 inputs
