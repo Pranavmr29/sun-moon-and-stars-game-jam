@@ -132,7 +132,7 @@ syncNextButton = True
 syncBackButton = True
 
 missileLevelPos = (0,0)
-unlockedLevels = [1]
+unlockedLevels = [1,2,3,4,5,6,7,8]
 
 explosion_active = False
 explosion_pos = (0, 0)
@@ -611,7 +611,8 @@ while running:
                 elif in_bounds(mx, my, HOME_BTN):
                     currState = GameStates.TRANSITION_TO_HOME
                 elif in_bounds(mx, my, NEXT_BTN):
-                    currState = GameStates.TRANSITION_TO_L2
+                    if 2 in unlockedLevels:
+                        currState = GameStates.TRANSITION_TO_L2
 
         #region L2 inputs
         elif currState == GameStates.L2:
@@ -628,7 +629,8 @@ while running:
                 elif in_bounds(mx, my, BACK_BTN):
                     currState = GameStates.TRANSITION_TO_L1
                 elif in_bounds(mx, my, NEXT_BTN):
-                    currState = GameStates.TRANSITION_TO_L3
+                    if 3 in unlockedLevels:
+                        currState = GameStates.TRANSITION_TO_L3
 
         #region L3 inputs
         elif currState == GameStates.L3:
@@ -645,7 +647,8 @@ while running:
                 elif in_bounds(mx, my, BACK_BTN):
                     currState = GameStates.TRANSITION_TO_L2
                 elif in_bounds(mx, my, NEXT_BTN):
-                    currState = GameStates.TRANSITION_TO_L4
+                    if 4 in unlockedLevels:
+                        currState = GameStates.TRANSITION_TO_L4
     
         #region L4 inputs
         elif currState == GameStates.L4:
@@ -662,7 +665,8 @@ while running:
                 elif in_bounds(mx, my, BACK_BTN):
                     currState = GameStates.TRANSITION_TO_L3
                 elif in_bounds(mx, my, NEXT_BTN):
-                    currState = GameStates.TRANSITION_TO_L5
+                    if 5 in unlockedLevels:
+                        currState = GameStates.TRANSITION_TO_L5
 
         #region L5 inputs
         elif currState == GameStates.L5:
@@ -681,7 +685,8 @@ while running:
                 elif in_bounds(mx, my, BACK_BTN):
                     currState = GameStates.TRANSITION_TO_L4
                 elif in_bounds(mx, my, NEXT_BTN):
-                    currState = GameStates.TRANSITION_TO_L6
+                    if 6 in unlockedLevels:
+                        currState = GameStates.TRANSITION_TO_L6
 
         #region L6 inputs
         elif currState == GameStates.L6:
@@ -699,7 +704,8 @@ while running:
                 elif in_bounds(mx, my, BACK_BTN):
                     currState = GameStates.TRANSITION_TO_L5
                 elif in_bounds(mx, my, NEXT_BTN):
-                    currState = GameStates.TRANSITION_TO_L7
+                    if 7 in unlockedLevels:
+                        currState = GameStates.TRANSITION_TO_L7
 
         #region L7 inputs
         elif currState == GameStates.L7:
@@ -722,7 +728,8 @@ while running:
                 elif in_bounds(mx, my, BACK_BTN):
                     currState = GameStates.TRANSITION_TO_L6
                 elif in_bounds(mx, my, NEXT_BTN):
-                    currState = GameStates.TRANSITION_TO_L8
+                    if 8 in unlockedLevels:
+                        currState = GameStates.TRANSITION_TO_L8
 
 
         #region L8 inputs
